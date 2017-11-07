@@ -3,12 +3,11 @@
 
 https://github.com/KiboOst/php-qivivoAPI
 
-
 */
 
 class qivivoAPI {
 
-    public $_version = '0.1';
+    public $_version = '0.2';
 
     //user functions======================================================
     //GET:
@@ -23,7 +22,9 @@ class qivivoAPI {
     {
         if ($this->_fullDatas == null) $datas = $this->getDatas();
         if ( isset($datas['error']) ) return $datas;
-        return array('result'=>$this->_fullDatas['temperatures']);
+        $datas = $this->_fullDatas['temperatures'];
+        $datas['message'] = $this->_fullDatas['message'];
+        return array('result'=>$datas);
     }
 
     public function getWeather() //@return['result'] array with weather datas
@@ -73,12 +74,18 @@ class qivivoAPI {
         if ($this->_isMultizone)
         {
             $modules = $this->_fullDatas['multizone']['wirelessModules'];
-
             foreach($modules as $module)
             {
                 $zoneName = $module['zone_name'];
                 if ($zoneName != 'Zone Thermostat')
                 {
+                    $thisID = $module['zone_current_mode'];
+                    /* hey qivivo, stop changing your code every 10mins!!!!!
+                    foreach($programs as $prog)
+                    {
+                        if ($thisID == $prog['id']) $result[$zoneName] = $prog['name'];
+                    }
+                    */
                     $current_mode = $module['zone_current_mode'];
                     $thisPlan = $programs[$current_mode];
                     $result[$zoneName] = $thisPlan['name'];
@@ -86,6 +93,17 @@ class qivivoAPI {
             }
         }
         return array('result'=>$result);
+    }
+
+    public function getSynthesis($dateStart, $dateEnd)
+    {
+        $url = $this->_urlRoot.'/synthese/month';
+        $post = 'dateStart='.$dateStart.'&dateEnd='.$dateEnd;
+        $answer = $this->_request('POST', $url, $post, $xmlRequest=true);
+        $jsonAnswer = json_decode($answer, true);
+        if (!isset($jsonAnswer['success'])) return array('result'=>null, 'error'=>$jsonAnswer);
+        unset($jsonAnswer['content']['synthesisData']['success']);
+        return array('result'=>$jsonAnswer['content']['synthesisData']);
     }
 
     public function getProducts()
@@ -139,8 +157,30 @@ class qivivoAPI {
         return array('result'=>$datas);
     }
 
-
     //SET:
+    public function setTemperature($value, $programName=false)
+    {
+        $url = $this->_urlRoot.'/temps-reel/temperature';
+        $myID = false;
+
+        if ($programName)
+        {
+            $programs = $this->_fullDatas['plannings']['plannings'];
+            foreach($programs as $prog)
+            {
+                if ($programName == $prog['name']) $myID = $prog['id'];
+            }
+            if (!$myID) return array('result'=>null, 'error'=>'Sorry, could not find program '.$name);
+        }
+
+        $post = 'service=QTC&wantedTemperature='.$value.'&planningId=';
+        if ($myID) $post .= $myID;
+        $answer = $this->_request('POST', $url, $post, $xmlRequest=true);
+        $jsonAnswer = json_decode($answer, true);
+        if (!isset($jsonAnswer['success']['state'])) return array('result'=>null, 'error'=>$jsonAnswer);
+        return array('result'=>true);
+    }
+
     public function setHeatingPower($state=true) //@state false/true | @return['result'] true, @return['error'] if any
     {
         $state = var_export($state, true);
@@ -191,7 +231,7 @@ class qivivoAPI {
         {
             if ($name == $prog['name']) $myID = $prog['id'];
         }
-        if (!$myID) return array('result'=>null, 'error'=>'Sorry, could not find planning '.$name);
+        if (!$myID) return array('result'=>null, 'error'=>'Sorry, could not find program '.$name);
 
         //set program day per day:
         $url = $this->_urlRoot.'/programmation/set-periods-byday';
@@ -220,13 +260,6 @@ class qivivoAPI {
         }
         return array('result'=>true);
     }
-
-    /* programmation urls
-    /myQivivo/programmation/set-current-planning
-    /myQivivo/programmation/rename-planning
-    /myQivivo/programmation/delete-planning
-    /myQivivo/programmation/create-planning
-    */
 
     //INTERNAL FUNCTIONS==================================================
     protected function programToReadable($program) //datas from qivivo['days'] to readable datas per day
