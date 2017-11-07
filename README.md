@@ -34,7 +34,6 @@ This API is reverse-engineered, provided for research and development for intero
 
 [&#8657;](#php-qivivoapi)
 <img align="right" src="/readmeAssets/howto.png" width="48">
-
 ## How-to
 - Download class/qivivoAPI.php and put it on your server.
 - Include qivivoAPI.php in your script.
@@ -72,6 +71,11 @@ echo "<pre>_____>heating:<br>".json_encode($heating, JSON_PRETTY_PRINT)."</pre><
 $weather = $_qivivo->getWeather();
 echo "<pre>_____>weather:<br>".json_encode($weather, JSON_PRETTY_PRINT)."</pre><br>";
 
+//get synthesis between two datas
+//date format yearmonthdayhour. You can ask synthesis for a month, or just one dey like this for example:
+$getSynthesis = $_qivivo->getSynthesis(201711050000, 201711060000);
+echo "<pre>_____>getSynthesis:<br>".json_encode($getSynthesis, JSON_PRETTY_PRINT)."</pre><br>";
+
 //get products with info (serial number, firmware, etc.)
 $getProducts = $_qivivo->getProducts();
 echo "<pre>_____>getProducts:<br>".json_encode($getProducts['result'], JSON_PRETTY_PRINT)."</pre><br>";
@@ -104,6 +108,12 @@ echo "<pre>_____>getProgram:<br>".json_encode($getProgram, JSON_PRETTY_PRINT)."<
 //change heating:
 $setHeatingPower = $_qivivo->setHeatingPower(true);
 echo "<pre>_____>setHeatingPower:<br>".json_encode($setHeatingPower, JSON_PRETTY_PRINT)."</pre><br>";
+
+//set temperature
+//for thermostat zone: provide temperature
+//for other zone, provide -1 or 1 and program name
+$setTemperature = $_qivivo->setTemperature(17.5, false);
+echo "<pre>_____>setTemperature:<br>".json_encode($setTemperature, JSON_PRETTY_PRINT)."</pre><br>";
 
 //change temperatures settings:
 //available settings are: 'pres_1', 'pres_2', 'pres_3', 'pres_4', 'confort', 'nuit', 'hg', 'absence'
@@ -161,12 +171,16 @@ echo "<pre>_____>setProgram:<br>".json_encode($setProgram, JSON_PRETTY_PRINT)."<
 <img align="right" src="/readmeAssets/changes.png" width="48">
 ## Version history
 
-#### v 0.1 (2017-11-07)
+#### v0.2 (2017-11-07)
+- New : setTemperature()
+- New : getSynthesis()
+- Change: getTemperatures() now return message
+
+#### v0.1 (2017-11-07)
 - First public version!
 
 [&#8657;](#php-qivivoapi)
 <img align="right" src="/readmeAssets/mit.png" width="48">
-
 ## License
 
 The MIT License (MIT)
