@@ -53,7 +53,7 @@ if (isset($_qivivo->error)) echo $_qivivo->error;
 
 [&#8657;](#php-qivivoapi)
 Let the fun begin:
-
+<img align="right" src="/readmeAssets/read.png" width="48">
 #### READING OPERATIONS<br />
 
 ```php
@@ -98,7 +98,6 @@ echo "<pre>_____>getProgram:<br>".json_encode($getProgram, JSON_PRETTY_PRINT)."<
 
 [&#8657;](#php-qivivoapi)
 <img align="right" src="/readmeAssets/set.png" width="48">
-
 #### CHANGING OPERATIONS<br />
 
 ```php
@@ -159,8 +158,7 @@ echo "<pre>_____>setProgram:<br>".json_encode($setProgram, JSON_PRETTY_PRINT)."<
 ```
 
 [&#8657;](#php-qivivoapi)
-<img align="right" src="/readmeAssets/consumption.png" width="48">
-
+<img align="right" src="/readmeAssets/changes.png" width="48">
 ## Version history
 
 #### v 0.1 (2017-11-07)
