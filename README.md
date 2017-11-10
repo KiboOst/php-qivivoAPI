@@ -6,14 +6,17 @@
 
 This php API allows you to control your Smart Qivivo Thermostat.
 
-It will allow you for example, on a smarthome scenario like "Going hollidays", to automatically change programs according to your scenario.<br />
-Or simply get some Qivivo data with php ;-)
+At this time, when using multi-zone feature, Qivivo doesn't provide option to store/load different plannings for each zone. So I developed this API in a few hours part-time to be able to do it, and not have to manually change each period of each day for each zone!
 
-At this time, when using multi-zone feature, Qivivo doesn't provide option to store/load different plannings for each zone.<br />
-So I developed this API in a few hours part-time to be able to do it, and not have to manually change each period of each day!
+### Use case example
+- Get your Qivivo data to trigger other actions.<br />
+- Set a scenario in your smarthome (or trigger an url script) like "Going hollidays", to automatically change programs according to your scenario (*working, hollidays, away*).<br />
+- Set your heating according to other weather sources (external Netatmo sensor, etc).<br />
+- Set your heating if your interior camera recognize you.<br />
+- As Qivivo doesn't support IFTTT yet, you can make your own trigger script!
 
-*It is developed with a french account, so some data like days in programs will be in french. I can do it in en if other users need it.<br />
-Feel free to submit an issue or pull request to add more.*
+
+*It is developed with a french account, so some data like days in programs will be in french. I can do it in en if other users need it. Feel free to submit an issue or pull request to add more.*
 
 *This isn't an official API | USE AT YOUR OWN RISK!<br />
 This API is reverse-engineered, provided for research and development for interoperability.*<br />
