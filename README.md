@@ -6,7 +6,10 @@
 
 This php API allows you to control your Smart Qivivo Thermostat.
 
-At this time, when using multi-zone feature, Qivivo doesn't provide option to store/load different plannings for each zone. So I developed this API in a few hours part-time to be able to do it, and not have to manually change each period of each day for each zone!
+The official Qivivo API doesn't provide any function yet for multi-zone.
+In browser/app, at this time, when using multi-zone, Qivivo doesn't provide option to store/load different programs for each zone.<br />
+So I developed this API in a few hours part-time to be able to do it, and not have to manually change each period of each day for each zone!<br />
+Once the official Qivivo API will fully support multi-zone, I will provide an api to handle connection and all requests, so we will be able to concentrate on our scripts.
 
 ### Use case example
 - Get your Qivivo data to trigger other actions.<br />
