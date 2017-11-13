@@ -9,7 +9,8 @@ This php API allows you to control your Smart Qivivo Thermostat.
 The official Qivivo API doesn't provide any function yet for multi-zone.
 In browser/app, at this time, when using multi-zone, Qivivo doesn't provide option to store/load different programs for each zone.<br />
 So I developed this API in a few hours part-time to be able to do it, and not have to manually change each period of each day for each zone!<br />
-Once the official Qivivo API will fully support multi-zone, I will provide an api to handle connection and all requests, so we will be able to concentrate on our scripts.
+
+If you need a simple api to use official Qivivo API without headaches: [php-simpleQivivoAPI](https://github.com/KiboOst/php-simpleQivivoAPI)
 
 ### Use case example
 - Get your Qivivo data to trigger other actions.<br />
@@ -17,7 +18,6 @@ Once the official Qivivo API will fully support multi-zone, I will provide an ap
 - Set your heating according to other weather sources (external Netatmo sensor, etc).<br />
 - Set your heating if your interior camera recognize you.<br />
 - As Qivivo doesn't support IFTTT yet, you can make your own trigger script!
-
 
 *It is developed with a french account, so some data like days in programs will be in french. I can do it in en if other users need it. Feel free to submit an issue or pull request to add more.*
 
