@@ -7,10 +7,10 @@ https://github.com/KiboOst/php-qivivoAPI
 
 class qivivoAPI {
 
-    public $_version = '0.2';
+    public $_version = '0.21';
 
-    //user functions======================================================
-    //GET:
+    //USER FUNCTIONS======================================================
+    //GET FUNCTIONS:
     public function getHeating() //@return['result'] array with heating datas
     {
         if ($this->_fullDatas == null) $datas = $this->getDatas();
@@ -79,16 +79,12 @@ class qivivoAPI {
                 $zoneName = $module['zone_name'];
                 if ($zoneName != 'Zone Thermostat')
                 {
-                    $thisID = $module['zone_current_mode'];
-                    /* hey qivivo, stop changing your code every 10mins!!!!!
+                    $current_mode = $module['zone_current_mode'];
+                    $zoneuid = $module['zone_uid'];
                     foreach($programs as $prog)
                     {
-                        if ($thisID == $prog['id']) $result[$zoneName] = $prog['name'];
+                        if ($zoneuid == $prog['id']) $result[$zoneName] = $prog['name'];
                     }
-                    */
-                    $current_mode = $module['zone_current_mode'];
-                    $thisPlan = $programs[$current_mode];
-                    $result[$zoneName] = $thisPlan['name'];
                 }
             }
         }
@@ -157,7 +153,7 @@ class qivivoAPI {
         return array('result'=>$datas);
     }
 
-    //SET:
+    //SET FUNCTIONS:
     public function setTemperature($value, $programName=false)
     {
         $url = $this->_urlRoot.'/temps-reel/temperature';
@@ -283,7 +279,7 @@ class qivivoAPI {
         return $prog;
     }
 
-    //______________________calling functions
+    //CALLING FUNCTIONS===================================================
     protected function getDatas() //request thermostat datas
     {
         $url = $this->_urlRoot.'/temps-reel/update';
@@ -399,7 +395,7 @@ class qivivoAPI {
         }
     }
 
-    //functions authorization=============================================
+    //AUTHORIZATION=======================================================
     public $error = null;
     public $_csrf = null;
     public $_csrfName = null;
