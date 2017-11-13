@@ -138,36 +138,34 @@ There is two sorts of programs, for thermostat zone or other zones.
 - Other zone values are:
 'mz_comfort', 'mz_comfort_minus_one', 'mz_comfort_minus_two', 'mz_eco', 'mz_frost', 'mz_off'
 
-You will first have to build an array for all days, with periods and setting.
+You will first have to build an array for all days starting from monday, with periods and setting.
 You can store different arrays for different programs, and just change them in a few seconds.
 */
 //change thermostat zone program example:
-$dayType1 = [['0:0', '5:29', 'nuit'], ['5:30', '8:14', 'pres_3'], ['8:15', '15:59', 'nuit'], ['16:0', '17:29', 'pres_2'], ['17:30', '23:59', 'pres_3']];
-$dayType2 = [['0:0', '7:29', 'nuit'], ['7:30', '21:59', 'pres_3'], ['22:0', '23:59', 'pres_2']];
-$myWorkMasterProgram = array();
-array_push($myWorkMasterProgram, $dayType1);
-array_push($myWorkMasterProgram, $dayType1);
-array_push($myWorkMasterProgram, $dayType2);
-array_push($myWorkMasterProgram, $dayType1);
-array_push($myWorkMasterProgram, $dayType1);
-array_push($myWorkMasterProgram, $dayType2);
-array_push($myWorkMasterProgram, $dayType2);
-
+$dayType1 = [['0:0', '5:29', 'nuit'],
+             ['5:30', '8:14', 'pres_3'],
+             ['8:15', '15:59', 'nuit'],
+             ['16:0', '17:29', 'pres_2'],
+             ['17:30', '23:59', 'pres_3']];
+$dayType2 = [['0:0', '7:29', 'nuit'],
+             ['7:30', '21:59', 'pres_3'],
+             ['22:0', '23:59', 'pres_2']];
+$myWorkMasterProgram = [$dayType1, $dayType1, $dayType2, $dayType1, $dayType1, $dayType2, $dayType2];
 $setProgram = $_qivivo->setProgram('Semaine Travail', $myWorkMasterProgram);
 echo "<pre>_____>setProgram:<br>".json_encode($setProgram, JSON_PRETTY_PRINT)."</pre><br>";
 
 //change other zone program example:
-$dayType1 = [['0:0', '5:29', 'mz_eco'], ['5:30', '7:59', 'mz_comfort'], ['8:0', '17:29', 'mz_eco'], ['17:30', '21:59', 'mz_comfort_minus_one'], ['22:0', '23:59', 'mz_eco']];
-$dayType2 = [['0:0', '5:29', 'mz_eco'], ['5:30', '9:29', 'mz_comfort'], ['9:30', '17:29', 'mz_comfort_minus_two'], ['17:30', '21:59', 'mz_comfort_minus_one'], ['22:0', '23:59', 'mz_eco']];
-$myWorkZoneProgram = array();
-array_push($myWorkZoneProgram, $dayType1);
-array_push($myWorkZoneProgram, $dayType1);
-array_push($myWorkZoneProgram, $dayType2);
-array_push($myWorkZoneProgram, $dayType1);
-array_push($myWorkZoneProgram, $dayType1);
-array_push($myWorkZoneProgram, $dayType2);
-array_push($myWorkZoneProgram, $dayType2);
-
+$dayType1 = [['0:0', '5:29', 'mz_eco'],
+             ['5:30', '7:59', 'mz_comfort'],
+             ['8:0', '17:29', 'mz_eco'],
+             ['17:30', '21:59', 'mz_comfort_minus_one'],
+             ['22:0', '23:59', 'mz_eco']];
+$dayType2 = [['0:0', '5:29', 'mz_eco'],
+             ['5:30', '9:29', 'mz_comfort'],
+             ['9:30', '17:29', 'mz_comfort_minus_two'],
+             ['17:30', '21:59', 'mz_comfort_minus_one'],
+             ['22:0', '23:59', 'mz_eco']];
+$myWorkZoneProgram = [$dayType1, $dayType1, $dayType2, $dayType1, $dayType1, $dayType2, $dayType2];
 $setProgram = $_qivivo->setProgram('mz_Chambres', $myWorkZoneProgram);
 echo "<pre>_____>setProgram:<br>".json_encode($setProgram, JSON_PRETTY_PRINT)."</pre><br>";
 
