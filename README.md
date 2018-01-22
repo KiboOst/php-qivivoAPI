@@ -1,195 +1,295 @@
-<img align="right" src="/readmeAssets/qivivoAPI.jpg" width="150">
 
-# php-qivivoAPI
 
-## php API for Smart Qivivo Thermostat
+<img align="right" src="Assets/logoJeedom.png" width="64"><br>
+# php-qivivoAPI - Jeedom
 
-This php API allows you to control your Smart Qivivo Thermostat.
+## Utilisation avec Jeedom
 
-The official Qivivo API doesn't provide any function yet for multi-zone.
-In browser/app, at this time, when using multi-zone, Qivivo doesn't provide option to store/load different programs for each zone.<br />
-So I developed this API in a few hours part-time to be able to do it, and not have to manually change each period of each day for each zone!<br />
+Voici un exemple d'utilisation de php-qivivoAPI avec Jeedom, afin d'automatiser vos changements de plannings multi-zone !
 
-If you need a simple api to use official Qivivo API without headaches: [php-simpleQivivoAPI](https://github.com/KiboOst/php-simpleQivivoAPI)
+L'objectif consiste à créer un Script avec des appels différents par planning. Le Script va ensuite utiliser l'API pour changer directement vos plannings, en fonction du Plugin Mode par exemple ou d'un Virtuel avec des commandes, ou depuis un scénario, etc.
 
-### Use case example
-- Get your Qivivo data to trigger other actions.<br />
-- Set a scenario in your smarthome (or trigger an url script) like "Going hollidays", to automatically change programs according to your scenario (*working, hollidays, away*).<br />
-- Set your heating according to other weather sources (external Netatmo sensor, etc).<br />
-- Set your heating if your interior camera recognize you.<br />
-- As Qivivo doesn't support IFTTT yet, you can make your own trigger script!
+### Attention
+Il vous faudra quand même quelques connaissances en php, car vous aurez forcément à adapter le script que nous allons créer en fonction du nombre de zones, du nombre de plannings souhaités, et bien sur de vos horaires.
 
-*It is developed with a french account, so some data like days in programs will be in french. I can do it in en if other users need it. Feel free to submit an issue or pull request to add more.*
+Cela va donc consister à:
 
-*This isn't an official API | USE AT YOUR OWN RISK!<br />
-This API is reverse-engineered, provided for research and development for interoperability.*<br />
+- Télécharger php-qivivoAPI sur votre Jeedom.
+- Créer un Script qui appellera l'API en lui passant vos plannings.
+- Facultatif: Créer un Mode correspondant à vos plannings.
 
-[Requirements](#requirements)<br />
-[How-to](#how-to)<br />
-[Connection](#connection)<br />
-[Reading datas](#reading-operations)<br />
-[Changing datas](#changing-operations)<br />
-[Version history](#version-history)<br />
+Il vous faudra pour çà trois plugins, gratuits:
 
-<img align="right" src="/readmeAssets/requirements.png" width="48">
+- Le plugin Outils de développement
+- Le plugin Script
+- Le plugin Mode, ou le plugin Virtuel (facultatif).
 
-## Requirements
-- PHP v5+
-- cURL (quite standard in PHP servers).
-- The API require internet access (it will authenticate against Qivivo servers).
+Voici l'affichage avec le plugin Mode sur le Dashboard:
 
-[&#8657;](#php-qivivoapi)
-<img align="right" src="/readmeAssets/howto.png" width="48">
-## How-to
-- Download class/qivivoAPI.php and put it on your server.
-- Include qivivoAPI.php in your script.
-- Start it with your Qivivo username/password.
-All function should return an array with 'result' or 'error'. So you can check for 'error' before getting 'result': if (!isset($answer['error']) ...
+<p align="center"><img src="Assets/dashboard.jpg" width="218"></p>
 
-- This API
 
-#### Connection
+## Télécharger php-qivivoAPI sur votre Jeedom
+
+- Récupérez le fichier php-qivivoAPI.php
+- Sur votre Jeedom, avec le plugin Outils de développement, créez un dossier kiboost et un sous dossier Qivivo à la racine, et mettez le php-qivivoAPI.php  dedans.
+- Dans le même répertoire, créez un fichier qivivo_trigger.php
+
+> Vous pouvez mettre les fichiers où bon vous semble, il faudra simplement
+> changer les premières ligne du code du Script un peu plus bas. Dans
+> cet exemple, son chemin sera donc html/kiboost/Qivivo/php-qivivoAPI.php
+
+
+## Création du Script
+
+- Rien de compliqué ici, Plugins/Programmation/Script, puis créez un Script en cochant *Activer*. Ici il aura pour nom Qivivo Plannings et pour parent Scripts.
+
+<p align="center"><img src="Assets/script_eq.jpg" width="500"></p>
+
+Créez ensuite autant de commandes que de plannings. Un planning comprendra votre zone thermostat et les autres zones.
+
+> Vous pouvez nommer les commandes comme vous voulez, et adapter le code plus bas pour correspondre.
+> Chaque commande appellera le même script (qivivo_trigger.php crée plus haut), en lui passant le paramètre mode pour lui indiquer quel planning il doit attribuer à Qivivo.
+
+<p align="center"><img src="Assets/script_cmds.jpg" width="500"></p>
+
+
+## Création des plannings
+
+Avant de créer les plannings, il nous faut d'abord connaitre les zones déclarées dans votre compte Qivivo.
+Nous allons donc utiliser le fichier qivivo_trigger.php pour connaitre les noms de nos zones définies dans Qivivo, afin de les appeler ensuite. Cette étape n'est à faire qu'une fois, à la mise en place ;-)
+
+Éditer le fichier qivivo_trigger.php (avec les Outils de Développement ou directement avec le bouton Editer depuis une des commandes).
+
+Coller ceci dedans, en renseignant vos identifiants:
 
 ```php
-require($_SERVER['DOCUMENT_ROOT'].'/path/to/qivivoAPI.php');
+<?php
+include('qivivoAPI.php');
+include('/var/www/html/core/class/scenario.class.php');
+
+$qivivo_user = 'myqivivologin';
+$qivivo_pass = 'myqivivopassword';
+
+//===========initialize API:
+log::add('script','error','initializing API...');
 $_qivivo = new qivivoAPI($qivivo_user, $qivivo_pass);
-if (isset($_qivivo->error)) echo $_qivivo->error;
+if (isset($_qivivo->error))
+{
+    $error = $_qivivo->error;
+    log::add('script','error','ERROR: '.$error);
+
+}
+else
+{
+    $getCurrentProgram = $_qivivo->getCurrentProgram();
+    $string = json_encode($getCurrentProgram, JSON_PRETTY_PRINT);
+    log::add('script','error',$string);
+}
+?>
 ```
 
-[&#8657;](#php-qivivoapi)
-Let the fun begin:
-<img align="right" src="/readmeAssets/read.png" width="48">
-#### READING OPERATIONS<br />
+Cliquez ensuite sur le bouton Tester à droite d'une des commandes (les trois commandes renvoyant vers le même fichier php)
+
+Regardez alors le log script depuis le menu Analyse/Logs, vous devriez avoir quelque chose comme çà, avec le nom de vos zones et l'identification de la zone par Qivivo:
+
+[2018-01-22 10:40:17][ERROR] : initializing API...
+[2018-01-22 10:40:18][ERROR] : {     "result": {         "Zone Thermostat": "thermostat",         "Chambres": "mz_Chambres",     "SdBs": "mz_SdBs"     } }
+
+> Le log est renseigné en ERROR volontairement pour qu'il apparaisse
+> quelques soit votre configuration de log.
+
+Nous avons ici trois zones, avec les identifiants thermostat, mz_Chambres, et mz_SdBs. Ce sont ces identifiants que nous utiliserons dans le script final. J'ai effectivement deux zones en plus du thermostat, pour les chambres et les salles-de-bains.
+
+Il reste maintenant à éditer le fichier qivivo_trigger.php, et pré-remplir vos plannings avec votre zone thermostat et toutes vos zones.
+
+Si l'API n'arrive pas à se connecter (serveurs Qivivo en panne par exemple), le script crée un message Jeedom pour vous avertir.
+
+Ensuite, tout se passe dans la fonction switchMode(), c'est ici qu'il faudra adapter les noms de vos plannings (adapter aussi les commandes du Script avec les même noms), et remplir vos plannings. En fin de scripts, $_qivivo->setProgram doit correspondre à vos zones, et vos variables de programmes si vous les avez changé.
 
 ```php
-//you can get all datas from thermostat and parse them if you need:
-echo "<pre>_____>_qivivo:<br>".json_encode($_qivivo, JSON_PRETTY_PRINT)."</pre><br>";
+<?php
+include('qivivoAPI.php');
+include('/var/www/html/core/class/scenario.class.php');
 
-//get home temperatures and temperatures settings:
-$temps = $_qivivo->getTemperatures();
-echo "<pre>_____>temps:<br>".json_encode($temps, JSON_PRETTY_PRINT)."</pre><br>";
+$qivivo_user = 'myqivivologin';
+$qivivo_pass = 'myqivivopassword';
 
-//get heating:
-$heating = $_qivivo->getHeating();
-echo "<pre>_____>heating:<br>".json_encode($heating, JSON_PRETTY_PRINT)."</pre><br>";
+if (isset($argv)) {
+  foreach ($argv as $arg) {
+    $argList = explode('=', $arg);
+    if (isset($argList[0]) && isset($argList[1])) {
+      $_GET[$argList[0]] = $argList[1];
+    }
+  }
+}
 
-//get weather:
-$weather = $_qivivo->getWeather();
-echo "<pre>_____>weather:<br>".json_encode($weather, JSON_PRETTY_PRINT)."</pre><br>";
+$mode = 'travail'; //default mode
+if(isset($_GET['mode'])) $mode = $_GET['mode'];
 
-//get synthesis between two datas
-//date format yearmonthdayhour. You can ask synthesis for a month, or just one dey like this for example:
-$getSynthesis = $_qivivo->getSynthesis(201711050000, 201711060000);
-echo "<pre>_____>getSynthesis:<br>".json_encode($getSynthesis, JSON_PRETTY_PRINT)."</pre><br>";
+//===========initialize API:
+$_qivivo = new qivivoAPI($qivivo_user, $qivivo_pass);
+if (isset($_qivivo->error))
+{
+    $error = $_qivivo->error;
+    message::add('Script:qivivo_trigger.php', $error);
+}
+else
+{
+    switchMode($mode);
+}
 
-//get products with info (serial number, firmware, etc.)
-$getProducts = $_qivivo->getProducts();
-echo "<pre>_____>getProducts:<br>".json_encode($getProducts['result'], JSON_PRETTY_PRINT)."</pre><br>";
-
-//get current program:
-//will return array with zone thermostat, and others zones if multizone is activated.
-$getCurrentProgram = $_qivivo->getCurrentProgram();
-echo "<pre>_____>getCurrentProgram:<br>".json_encode($getCurrentProgram, JSON_PRETTY_PRINT)."</pre><br>";
-
-//get program by name:
-/*Will return readable datas like:
-"Lundi": {
-        "0:0 | 5:59": "nuit",
-        "6:0 | 7:59": "pres_2",
-        "8:0 | 17:29": "absence",
-        "17:30 | 21:59": "pres_1",
-        "22:0 | 23:59": "nuit"
-    },
-*/
-$getProgram = $_qivivo->getProgram('programme 1');
-echo "<pre>_____>getProgram:<br>".json_encode($getProgram, JSON_PRETTY_PRINT)."</pre><br>";
-
-```
-
-[&#8657;](#php-qivivoapi)
-<img align="right" src="/readmeAssets/set.png" width="48">
-#### CHANGING OPERATIONS<br />
-
-```php
-//change heating:
-$setHeatingPower = $_qivivo->setHeatingPower(true);
-echo "<pre>_____>setHeatingPower:<br>".json_encode($setHeatingPower, JSON_PRETTY_PRINT)."</pre><br>";
-
-//set temperature
-//for thermostat zone: provide temperature
-//for other zone, provide -1 or 1 and program name
-$setTemperature = $_qivivo->setTemperature(17.5, false);
-echo "<pre>_____>setTemperature:<br>".json_encode($setTemperature, JSON_PRETTY_PRINT)."</pre><br>";
-
-//change temperatures settings:
-//available settings are: 'pres_1', 'pres_2', 'pres_3', 'pres_4', 'confort', 'nuit', 'hg', 'absence'
-$setTempSettings = $_qivivo->setTempSettings('pres_1', 19.5);
-echo "<pre>_____>setTempSettings:<br>".json_encode($setTempSettings, JSON_PRETTY_PRINT)."</pre><br>";
-
-//set departure alert setting, in day number:
-$setDepartureAlert = $_qivivo->setDepartureAlert(2);
-echo "<pre>_____>setDepartureAlert:<br>".json_encode($setDepartureAlert, JSON_PRETTY_PRINT)."</pre><br>";
-
-//change program:
+//===========actions:
 /*
-There is two sorts of programs, for thermostat zone or other zones.
-- Thermostat zone available values are:
-'pres_1', 'pres_2', 'pres_3', 'pres_4', 'confort', 'nuit', 'hg', 'absence'
-- Other zone values are:
-'mz_comfort', 'mz_comfort_minus_one', 'mz_comfort_minus_two', 'mz_eco', 'mz_frost', 'mz_off'
-
-You will first have to build an array for all days starting from monday, with periods and setting.
-You can store different arrays for different programs, and just change them in a few seconds.
+Thermostat zone: 'pres_1', 'pres_2', 'pres_3', 'pres_4', 'confort', 'nuit', 'hg', 'absence'
+Other zone: 'mz_comfort', 'mz_comfort_minus_one', 'mz_comfort_minus_two', 'mz_eco', 'mz_frost', 'mz_off'
 */
-//change thermostat zone program example:
-$dayType1 = [['0:0', '5:29', 'nuit'],
-             ['5:30', '8:14', 'pres_3'],
-             ['8:15', '15:59', 'nuit'],
-             ['16:0', '17:29', 'pres_2'],
-             ['17:30', '23:59', 'pres_3']];
-$dayType2 = [['0:0', '7:29', 'nuit'],
-             ['7:30', '21:59', 'pres_3'],
-             ['22:0', '23:59', 'pres_2']];
-$myWorkMasterProgram = [$dayType1, $dayType1, $dayType2, $dayType1, $dayType1, $dayType2, $dayType2];
-$setProgram = $_qivivo->setProgram('Semaine Travail', $myWorkMasterProgram);
-echo "<pre>_____>setProgram:<br>".json_encode($setProgram, JSON_PRETTY_PRINT)."</pre><br>";
 
-//change other zone program example:
-$dayType1 = [['0:0', '5:29', 'mz_eco'],
-             ['5:30', '7:59', 'mz_comfort'],
-             ['8:0', '17:29', 'mz_eco'],
-             ['17:30', '21:59', 'mz_comfort_minus_one'],
-             ['22:0', '23:59', 'mz_eco']];
-$dayType2 = [['0:0', '5:29', 'mz_eco'],
-             ['5:30', '9:29', 'mz_comfort'],
-             ['9:30', '17:29', 'mz_comfort_minus_two'],
-             ['17:30', '21:59', 'mz_comfort_minus_one'],
-             ['22:0', '23:59', 'mz_eco']];
-$myWorkZoneProgram = [$dayType1, $dayType1, $dayType2, $dayType1, $dayType1, $dayType2, $dayType2];
-$setProgram = $_qivivo->setProgram('mz_Chambres', $myWorkZoneProgram);
-echo "<pre>_____>setProgram:<br>".json_encode($setProgram, JSON_PRETTY_PRINT)."</pre><br>";
+//Set your own mode names, according to Script commands, and set your own plannings settings!
+function switchMode($mode)
+{
+    global $_qivivo;
 
+    if ($mode=='vacances')
+    {
+        //zone thermostat:
+        $samedi = [['0:0', '4:59', 'nuit'],
+                   ['5:0', '10:29', 'pres_4'],
+                   ['10:30', '16:59', 'pres_2'],
+                   ['17:0', '22:59', 'pres_4'],
+                   ['23:0', '23:59', 'pres_3']];
+        $masterProgram = [$samedi, $samedi, $samedi, $samedi, $samedi, $samedi, $samedi];
+
+        //zone chambres:
+        $dayType2 = [['0:0', '4:29', 'mz_eco'],
+                     ['4:30', '6:29', 'mz_comfort_minus_one'],
+                     ['6:30', '9:29', 'mz_comfort'],
+                     ['9:30', '17:29', 'mz_comfort_minus_two'],
+                     ['17:30', '21:59', 'mz_comfort_minus_one'],
+                     ['22:0', '23:59', 'mz_eco']];
+        $zoneChambresProgram = [$dayType2, $dayType2, $dayType2, $dayType2, $dayType2, $dayType2, $dayType2];
+
+        //zone salles de bain:
+        $dayType2 = [['0:0', '5:59', 'mz_eco'],
+                     ['6:0', '9:29', 'mz_comfort'],
+                     ['9:30', '17:29', 'mz_eco'],
+                     ['17:30', '18:59', 'mz_comfort_minus_one'],
+                     ['19:0', '21:59', 'mz_comfort'],
+                     ['22:0', '23:59', 'mz_comfort_minus_one']];
+        $zoneSdBsProgram = [$dayType2, $dayType2, $dayType2, $dayType2, $dayType2, $dayType2, $dayType2];
+    }
+
+    if ($mode=='travail')
+    {
+        //zone thermostat:
+        $lundi = [['0:0', '4:59', 'nuit'],
+                  ['5:0', '7:59', 'pres_4'],
+                  ['8:0', '16:29', 'pres_1'],
+                  ['16:30', '19:29', 'pres_4'],
+                  ['19:30', '22:59', 'pres_3'],
+                  ['23:0', '23:59', 'pres_2'],];
+        $mardi = [['0:0', '4:59', 'nuit'],
+                  ['5:0', '7:59', 'pres_4'],
+                  ['8:0', '18:29', 'pres_2'],
+                  ['19:0', '23:59', 'pres_3']];
+        $mercredi = [['0:0', '4:59', 'nuit'],
+                  ['5:0', '7:59', 'pres_4'],
+                  ['8:0', '18:29', 'pres_2'],
+                  ['19:0', '23:59', 'pres_3']];
+        $jeudi= [['0:0', '4:59', 'nuit'],
+                  ['5:0', '7:59', 'pres_4'],
+                  ['8:0', '18:29', 'pres_2'],
+                  ['19:0', '23:59', 'pres_3']];
+        $vendredi = [['0:0', '4:59', 'nuit'],
+                  ['5:0', '7:59', 'pres_4'],
+                  ['8:0', '18:29', 'pres_2'],
+                  ['19:0', '23:59', 'pres_3']];
+        $samedi = [['0:0', '4:59', 'nuit'],
+                  ['5:0', '7:59', 'pres_4'],
+                  ['8:0', '18:29', 'pres_2'],
+                  ['19:0', '23:59', 'pres_3']];
+        $masterProgram = [$lundi, $mardi, $mercredi, $jeudi, $vendredi, $samedi, $samedi];
+
+        //zone chambres:
+        $dayType1 = [['0:0', '4:29', 'mz_eco'],
+                     ['4:30', '6:29', 'mz_comfort_minus_one'],
+                     ['6:30', '9:29', 'mz_comfort'],
+                     ['9:30', '17:29', 'mz_comfort_minus_two'],
+                     ['17:30', '21:59', 'mz_comfort_minus_one'],
+                     ['22:0', '23:59', 'mz_eco']];
+        $dayType2 = [['0:0', '4:29', 'mz_eco'],
+                     ['4:30', '6:29', 'mz_comfort_minus_one'],
+                     ['6:30', '9:29', 'mz_comfort'],
+                     ['9:30', '17:29', 'mz_comfort_minus_two'],
+                     ['17:30', '21:59', 'mz_comfort_minus_one'],
+                     ['22:0', '23:59', 'mz_eco']];
+        $zoneChambresProgram = [$dayType1, $dayType1, $dayType2, $dayType1, $dayType1, $dayType2, $dayType2];
+
+        //zone salles de bain:
+        $dayType1 = [['0:0', '4:59', 'mz_eco'],
+                     ['5:0', '5:29', 'mz_comfort_minus_one'],
+                     ['5:30', '7:44', 'mz_comfort'],
+                     ['7:45', '17:29', 'mz_eco'],
+                     ['17:30', '18:59', 'mz_comfort_minus_one'],
+                     ['19:0', '21:59', 'mz_comfort'],
+                     ['22:0', '23:59', 'mz_comfort_minus_one']];
+        $dayType2 = [['0:0', '5:59', 'mz_eco'],
+                     ['6:0', '9:29', 'mz_comfort'],
+                     ['9:30', '17:29', 'mz_eco'],
+                     ['17:30', '18:59', 'mz_comfort_minus_one'],
+                     ['19:0', '21:59', 'mz_comfort'],
+                     ['22:0', '23:59', 'mz_comfort_minus_one']];
+        $zoneSdBsProgram = [$dayType1, $dayType1, $dayType2, $dayType1, $dayType1, $dayType2, $dayType2];
+    }
+
+    if ($mode=='absence')
+    {
+        //zone thermostat:
+        $dayType1 = [['0:0', '6:59', 'hg'],
+                     ['7:0', '18:29', 'absence'],
+                     ['18:30', '23:59', 'hg']];
+        $masterProgram = [$dayType1, $dayType1, $dayType1, $dayType1, $dayType1, $dayType1, $dayType1];
+
+        //zone chambres:
+        $dayType1 = [['0:0', '5:29', 'mz_frost'],
+                     ['5:30', '7:59', 'mz_eco'],
+                     ['8:0', '19:29', 'mz_frost'],
+                     ['19:30', '23:59', 'mz_eco']];
+        $zoneChambresProgram = [$dayType1, $dayType1, $dayType1, $dayType1, $dayType1, $dayType1, $dayType1];
+
+        //zone salles de bain:
+        $dayType1 = [['0:0', '5:29', 'mz_frost'],
+                     ['5:30', '7:59', 'mz_eco'],
+                     ['8:0', '19:29', 'mz_frost'],
+                     ['19:30', '23:59', 'mz_eco']];
+        $zoneSdBsProgram = [$dayType1, $dayType1, $dayType1, $dayType1, $dayType1, $dayType1, $dayType1];
+    }
+
+  //once your programs are defined, edit your zones names and programs variable accordingly:
+    $setProgram = $_qivivo->setProgram('thermostat', $masterProgram);
+    $setProgram = $_qivivo->setProgram('mz_Chambres', $zoneChambresProgram);
+    $setProgram = $_qivivo->setProgram('mz_SdBs', $zoneSdBsProgram);
+}
+
+?>
 ```
 
-[&#8657;](#php-qivivoapi)
-<img align="right" src="/readmeAssets/changes.png" width="48">
-## Version history
+## Et maintenant ?
 
-#### v0.2 (2017-11-07)
-- New : setTemperature()
-- New : getSynthesis()
-- Change: getTemperatures() now return message
+Nous avons donc maintenant un Script capable d'alterner les configurations de Qivivo entre trois plannings, *travail* *vacances* ou *absence*. Il reste donc à créer un moyen rapide dans Jeedom de déclencher ces changements. C'est propre à chacun, vous pouvez par exemple créer un Virtuel en reprenant les trois commandes, ou appeler les commandes depuis une Action dans un scenario comme cela:  #[Scripts][Qivivo Plannings][vacances]#
 
-#### v0.1 (2017-11-07)
-- First public version!
+Personnellement, j'utilise le Plugin Mode, compatible avec l'app iOS. Cela permet aussi de vérifier le mode dans un scénario avec un SI pour d'autres actions:
+SI #[Maison][Planning][Mode]# == "Vacances"
 
-[&#8657;](#php-qivivoapi)
-<img align="right" src="/readmeAssets/mit.png" width="48">
+<p align="center"><img src="Assets/Modes.jpg" width="500"></p>
+
+:-)
+
 ## License
 
 The MIT License (MIT)
 
-Copyright (c) 2017 KiboOst
+Copyright (c) 2018 KiboOst
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
