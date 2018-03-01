@@ -73,6 +73,10 @@ echo "<pre>_____>_qivivo:<br>".json_encode($_qivivo, JSON_PRETTY_PRINT)."</pre><
 $temps = $_qivivo->getTemperatures();
 echo "<pre>_____>temps:<br>".json_encode($temps, JSON_PRETTY_PRINT)."</pre><br>";
 
+//get actual mode of a non-thermostat zone:
+$getZoneMode = $_qivivo->getZoneMode('Chambres');
+echo "<pre>_____>getZoneMode:<br>".json_encode($getZoneMode, JSON_PRETTY_PRINT)."</pre><br>";
+
 //get heating:
 $heating = $_qivivo->getHeating();
 echo "<pre>_____>heating:<br>".json_encode($heating, JSON_PRETTY_PRINT)."</pre><br>";
@@ -178,6 +182,9 @@ echo "<pre>_____>setProgram:<br>".json_encode($setProgram, JSON_PRETTY_PRINT)."<
 [&#8657;](#php-qivivoapi)
 <img align="right" src="/readmeAssets/changes.png" width="48">
 ## Version history
+
+#### v0.25 (2018-03-01)
+- New : getZoneMode()
 
 #### v0.2 (2017-11-07)
 - New : setTemperature()
