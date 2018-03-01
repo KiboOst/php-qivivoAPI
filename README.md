@@ -73,7 +73,7 @@ echo "<pre>_____>_qivivo:<br>".json_encode($_qivivo, JSON_PRETTY_PRINT)."</pre><
 $temps = $_qivivo->getTemperatures();
 echo "<pre>_____>temps:<br>".json_encode($temps, JSON_PRETTY_PRINT)."</pre><br>";
 
-//get actual mode of a non-thermostat zone:
+//get actual mode of a non-thermostat zone: will return Confort -2, Confort -1, Hors-gel, Arrêt, Eco or Confort
 $getZoneMode = $_qivivo->getZoneMode('Chambres');
 echo "<pre>_____>getZoneMode:<br>".json_encode($getZoneMode, JSON_PRETTY_PRINT)."</pre><br>";
 
