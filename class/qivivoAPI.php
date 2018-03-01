@@ -7,7 +7,7 @@ https://github.com/KiboOst/php-qivivoAPI
 
 class qivivoAPI {
 
-    public $_version = '0.21';
+    public $_version = '0.25';
 
     //USER FUNCTIONS======================================================
     //GET FUNCTIONS:
@@ -32,6 +32,20 @@ class qivivoAPI {
         if ($this->_fullDatas == null) $datas = $this->getDatas();
         if ( isset($datas['error']) ) return $datas;
         return array('result'=>$this->_fullDatas['weather']);
+    }
+
+    public function getZoneMode($zone) //@return['result'] array with current zone mode
+    {
+        foreach ($this->_fullDatas['multizone']['wirelessModules'] as $mod)
+        {
+            if ($mod['zone_name'] == $zone)
+            {
+                $currentModeIdx = $mod['zone_current_mode'];
+                $currentMode = $this->_zoneModes[$currentModeIdx];
+                return array('result'=>$currentMode);
+            }
+        }
+        return array('result'=> null, 'error'=>'Unfound zone');
     }
 
     public function getProgram($name='') //@return['result'] array with readable formated program
@@ -411,6 +425,7 @@ class qivivoAPI {
     protected $_urlRoot = 'http://www.qivivo.com/myQivivo';
     protected $_curlHdl = null;
     protected $_cookFile = '';
+    protected $_zoneModes = ['Thermostat', null, null, 'Confort', 'Eco', 'Arrêt', 'Hors-gel', 'Confort -1', 'Confort -2'];
 
     protected function getCSRF($answerString)
     {
