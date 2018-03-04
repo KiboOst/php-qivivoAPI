@@ -425,7 +425,7 @@ class qivivoAPI {
     protected $_urlRoot = 'http://www.qivivo.com/myQivivo';
     protected $_curlHdl = null;
     protected $_cookFile = '';
-    protected $_zoneModes = ['Thermostat', null, null, 'Confort', 'Eco', 'Arrêt', 'Hors-gel', 'Confort -1', 'Confort -2'];
+    protected $_zoneModes = ['Thermostat', null, null, 'Confort', 'Eco', 'Arret', 'Hors-gel', 'Confort -1', 'Confort -2'];
 
     protected function getCSRF($answerString)
     {
