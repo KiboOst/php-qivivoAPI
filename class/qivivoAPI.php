@@ -7,7 +7,7 @@ https://github.com/KiboOst/php-qivivoAPI
 
 class qivivoAPI {
 
-    public $_version = '0.25';
+    public $_version = '0.3';
 
     //USER FUNCTIONS======================================================
     //GET FUNCTIONS:
@@ -118,7 +118,7 @@ class qivivoAPI {
 
     public function getProducts()
     {
-        $url = 'http://www.qivivo.com/fr/mon-compte/produits';
+        $url = 'http://www.qivivo.com/mon-compte/produits';
         $answer = $this->_request('GET', $url);
 
         //load it as html document:
@@ -197,7 +197,7 @@ class qivivoAPI {
         $availValues = ['false', 'true'];
         if (!in_array($state, $availValues)) return array('result'=>null, 'error'=>'Got wrong value, should be in '.implode(', ', $availValues));
 
-        $url = $this->_urlRoot.'/settings-power';
+        $url = $this->_urlRoot.'/settings-heating-power';
         $post = 'state='.$state;
         $answer = $this->_request('POST', $url, $post, $xmlRequest=true);
         $jsonAnswer = json_decode($answer, true);
@@ -211,7 +211,7 @@ class qivivoAPI {
         if (!in_array($code, $availValues)) return array('result'=>null, 'error'=>'Got wrong value, should be in '.implode(', ', $availValues));
 
         $url = $this->_urlRoot.'/settings';
-        $post = 'code='.$code.'&value='.strval($value);
+        $post = $code.'='.strval($value);
         $answer = $this->_request('POST', $url, $post, $xmlRequest=true);
         $jsonAnswer = json_decode($answer, true);
         if (!isset($jsonAnswer['success']['state'])) return array('result'=>null, 'error'=>$jsonAnswer);
@@ -225,7 +225,7 @@ class qivivoAPI {
         if (!in_array($days, $availValues)) return array('result'=>null, 'error'=>'Got wrong value, should be in '.implode(', ', $availValues));
 
         $url = $this->_urlRoot.'/settings-absence';
-        $post = 'cnt='.$days;
+        $post = 'dayNumber='.$days;
         $answer = $this->_request('POST', $url, $post, $xmlRequest=true);
         $jsonAnswer = json_decode($answer, true);
         if (!isset($jsonAnswer['success']['state'])) return array('result'=>null, 'error'=>$jsonAnswer);
@@ -248,20 +248,22 @@ class qivivoAPI {
         $dayId = 0;
         foreach($datas as $day)
         {
-            $postDatas = 'planningId='.$myID;
+            $postDatas = 'programId='.$myID;
             $postDatas .= '&dayId='.$dayId;
             $postPlanning = '';
             $periodID = 0;
             foreach($day as $period)
             {
-                $postPlanning .= '&planning['.$periodID.'][]='.intval(explode(':', $period[0])[0]);
-                $postPlanning .= '&planning['.$periodID.'][]='.intval(explode(':', $period[0])[1]);
-                $postPlanning .= '&planning['.$periodID.'][]='.intval(explode(':', $period[1])[0]);
-                $postPlanning .= '&planning['.$periodID.'][]='.intval(explode(':', $period[1])[1]);
-                $postPlanning .= '&planning['.$periodID.'][]='.$period[2];
+                $postPlanning .= '&dayProgram['.$periodID.'][0]='.intval(explode(':', $period[0])[0]);
+                $postPlanning .= '&dayProgram['.$periodID.'][1]='.intval(explode(':', $period[0])[1]);
+                $postPlanning .= '&dayProgram['.$periodID.'][2]='.intval(explode(':', $period[1])[0]);
+                $postPlanning .= '&dayProgram['.$periodID.'][3]='.intval(explode(':', $period[1])[1]);
+                $postPlanning .= '&dayProgram['.$periodID.'][4]='.$period[2];
                 $periodID += 1;
             }
             $postDatas .=  $postPlanning;
+            $postDatas = urlencode($postDatas);
+            $postDatas = str_replace(array('%3D', '%26'), array('=', '&'), $postDatas);
             $answer = $this->_request('POST', $url, $postDatas, $xmlRequest=true);
             $jsonAnswer = json_decode($answer, true);
             if (!isset($jsonAnswer['success']['state'])) return array('result'=>null, 'error'=>$jsonAnswer);
@@ -333,7 +335,7 @@ class qivivoAPI {
             curl_setopt($this->_curlHdl, CURLOPT_HEADER, true);
             curl_setopt($this->_curlHdl, CURLOPT_SSL_VERIFYHOST, false);
             curl_setopt($this->_curlHdl, CURLOPT_SSL_VERIFYPEER, false);
-            curl_setopt($this->_curlHdl, CURLOPT_REFERER, 'http://www.qivivo.com/myQivivo/');
+            curl_setopt($this->_curlHdl, CURLOPT_REFERER, 'http://www.qivivo.com/dashboard/');
             curl_setopt($this->_curlHdl, CURLOPT_USERAGENT, 'User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:51.0) Gecko/20100101 Firefox/51.0');
             curl_setopt($this->_curlHdl, CURLOPT_ENCODING , 'gzip, deflate');
         }
@@ -380,7 +382,7 @@ class qivivoAPI {
                                                     'Accept: */*',
                                                     'Accept-Language: fr-FR,fr;q=0.8,en-US;q=0.5,en;q=0.3',
                                                     'Accept-Encoding: gzip',
-                                                    'Referer: http://www.qivivo.com/myQivivo/',
+                                                    'Referer: http://www.qivivo.com/dashboard/',
                                                     'Content-Type: application/x-www-form-urlencoded',
                                                     'X-Requested-With: XMLHttpRequest',
                                                     'Connection: keep-alive'
@@ -422,7 +424,7 @@ class qivivoAPI {
     protected $_qivivo_pass;
     protected $_urlAuth = 'http://www.qivivo.com/login';
     protected $_urlAuthCheck = 'http://www.qivivo.com/login_check';
-    protected $_urlRoot = 'http://www.qivivo.com/myQivivo';
+    protected $_urlRoot = 'http://www.qivivo.com/dashboard';
     protected $_curlHdl = null;
     protected $_cookFile = '';
     protected $_zoneModes = ['Thermostat', null, null, 'Confort', 'Eco', 'Arret', 'Hors-gel', 'Confort -1', 'Confort -2'];
