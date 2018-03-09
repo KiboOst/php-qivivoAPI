@@ -7,10 +7,14 @@ https://github.com/KiboOst/php-qivivoAPI
 
 class qivivoAPI {
 
-    public $_version = '0.3';
+    public $_version = '0.31';
 
     //USER FUNCTIONS======================================================
     //GET FUNCTIONS:
+    public function refreshDatas()
+    {
+        $this->getDatas();
+    }
     public function getHeating() //@return['result'] array with heating datas
     {
         if ($this->_fullDatas == null) $datas = $this->getDatas();
