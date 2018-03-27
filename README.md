@@ -183,6 +183,9 @@ echo "<pre>_____>setProgram:<br>".json_encode($setProgram, JSON_PRETTY_PRINT)."<
 <img align="right" src="/readmeAssets/changes.png" width="48">
 ## Version history
 
+#### v0.4 (2018-03-27)
+- fix for Qivivo https switch
+
 #### v0.25 (2018-03-01)
 - New : getZoneMode()
 
@@ -200,7 +203,7 @@ echo "<pre>_____>setProgram:<br>".json_encode($setProgram, JSON_PRETTY_PRINT)."<
 
 The MIT License (MIT)
 
-Copyright (c) 2017 KiboOst
+Copyright (c) 2018 KiboOst
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
