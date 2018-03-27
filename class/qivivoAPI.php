@@ -7,7 +7,7 @@ https://github.com/KiboOst/php-qivivoAPI
 
 class qivivoAPI {
 
-    public $_version = '0.31';
+    public $_version = '0.4';
 
     //USER FUNCTIONS======================================================
     //GET FUNCTIONS:
@@ -122,7 +122,7 @@ class qivivoAPI {
 
     public function getProducts()
     {
-        $url = 'http://www.qivivo.com/mon-compte/produits';
+        $url = 'https://www.qivivo.com/mon-compte/produits';
         $answer = $this->_request('GET', $url);
 
         //load it as html document:
@@ -339,7 +339,7 @@ class qivivoAPI {
             curl_setopt($this->_curlHdl, CURLOPT_HEADER, true);
             curl_setopt($this->_curlHdl, CURLOPT_SSL_VERIFYHOST, false);
             curl_setopt($this->_curlHdl, CURLOPT_SSL_VERIFYPEER, false);
-            curl_setopt($this->_curlHdl, CURLOPT_REFERER, 'http://www.qivivo.com/dashboard/');
+            curl_setopt($this->_curlHdl, CURLOPT_REFERER, 'https://www.qivivo.com/dashboard/');
             curl_setopt($this->_curlHdl, CURLOPT_USERAGENT, 'User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:51.0) Gecko/20100101 Firefox/51.0');
             curl_setopt($this->_curlHdl, CURLOPT_ENCODING , 'gzip, deflate');
         }
@@ -361,8 +361,8 @@ class qivivoAPI {
                 curl_setopt($this->_curlHdl, CURLOPT_HEADER, false);
                 curl_setopt($this->_curlHdl, CURLOPT_HTTPHEADER, array(
                                                         'Connection: keep-alive',
-                                                        'Origin: http://www.qivivo.com',
-                                                        'Referer: http://www.qivivo.com/login',
+                                                        'Origin: https://www.qivivo.com',
+                                                        'Referer: https://www.qivivo.com/login',
                                                         'Upgrade-Insecure-Requests: 1',
                                                         'Accept-Encoding: gzip',
                                                         'Content-Type: application/x-www-form-urlencoded',
@@ -386,7 +386,7 @@ class qivivoAPI {
                                                     'Accept: */*',
                                                     'Accept-Language: fr-FR,fr;q=0.8,en-US;q=0.5,en;q=0.3',
                                                     'Accept-Encoding: gzip',
-                                                    'Referer: http://www.qivivo.com/dashboard/',
+                                                    'Referer: https://www.qivivo.com/dashboard/',
                                                     'Content-Type: application/x-www-form-urlencoded',
                                                     'X-Requested-With: XMLHttpRequest',
                                                     'Connection: keep-alive'
@@ -426,9 +426,9 @@ class qivivoAPI {
 
     protected $_qivivo_user;
     protected $_qivivo_pass;
-    protected $_urlAuth = 'http://www.qivivo.com/login';
-    protected $_urlAuthCheck = 'http://www.qivivo.com/login_check';
-    protected $_urlRoot = 'http://www.qivivo.com/dashboard';
+    protected $_urlAuth = 'https://www.qivivo.com/login';
+    protected $_urlAuthCheck = 'https://www.qivivo.com/login_check';
+    protected $_urlRoot = 'https://www.qivivo.com/dashboard';
     protected $_curlHdl = null;
     protected $_cookFile = '';
     protected $_zoneModes = ['Thermostat', null, null, 'Confort', 'Eco', 'Arret', 'Hors-gel', 'Confort -1', 'Confort -2'];
