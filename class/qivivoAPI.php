@@ -7,7 +7,7 @@ https://github.com/KiboOst/php-qivivoAPI
 
 class qivivoAPI {
 
-    public $_version = '0.41';
+    public $_version = '0.5';
 
     //USER FUNCTIONS======================================================
     //GET FUNCTIONS:
@@ -193,6 +193,39 @@ class qivivoAPI {
         $jsonAnswer = json_decode($answer, true);
         if (!isset($jsonAnswer['success']['state'])) return array('result'=>null, 'error'=>$jsonAnswer);
         return array('result'=>true);
+    }
+
+    public function setZoneMode($zone, $mode)
+    {
+        $url = $this->_urlRoot.'/temps-reel/mode';
+        $programId = -1;
+        foreach($this->_fullDatas['multizone']['wirelessModules'] as $module)
+        {
+            if ($module['zone_name'] == $zone)
+            {
+                $programId = $module['zone_uid'];
+                break;
+            }
+        }
+        if ($programId != -1)
+        {
+            $post = 'wantedMode='.$mode.'&programId='.$programId;
+            $answer = $this->_request('POST', $url, $post, $xmlRequest=true);
+            $jsonAnswer = json_decode($answer, true);
+            if (!isset($jsonAnswer['success']['state'])) return array('result'=>null, 'error'=>$jsonAnswer);
+            return array('result'=>true);
+        }
+        return array('result'=>null, 'error'=>'unfound zone');
+
+        /*
+        wantedMode:
+            confort -2 -> 8
+            confort -1 -> 7
+            Hors-Gel -> 6
+            Arrêt -> 5
+            Eco -> 4
+            confort -> 3
+        */
     }
 
     public function setHeatingPower($state=true) //@state false/true | @return['result'] true, @return['error'] if any
