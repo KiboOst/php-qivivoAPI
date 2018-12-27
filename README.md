@@ -123,11 +123,14 @@ echo "<pre>_____>getProgram:<br>".json_encode($getProgram, JSON_PRETTY_PRINT)."<
 $setHeatingPower = $_qivivo->setHeatingPower(true);
 echo "<pre>_____>setHeatingPower:<br>".json_encode($setHeatingPower, JSON_PRETTY_PRINT)."</pre><br>";
 
-//set temperature
-//for thermostat zone: provide temperature
-//for other zone, provide -1 or 1 and program name
+//set thermostat temperature
 $setTemperature = $_qivivo->setTemperature(17.5, false);
 echo "<pre>_____>setTemperature:<br>".json_encode($setTemperature, JSON_PRETTY_PRINT)."</pre><br>";
+
+//set zone mode:
+//available modes are: confort -2 -> 8, confort -1 -> 7, Hors-Gel -> 6, Arrêt -> 5, Eco -> 4, confort -> 3
+$setZoneMode = $_qivivo->setZoneMode('MyRoom', 7);
+echo "<pre>_____>setZoneMode:<br>".json_encode($setZoneMode['result'], JSON_PRETTY_PRINT)."</pre><br>";
 
 //change temperatures settings:
 //available settings are: 'pres_1', 'pres_2', 'pres_3', 'pres_4', 'confort', 'nuit', 'hg', 'absence'
@@ -182,6 +185,9 @@ echo "<pre>_____>setProgram:<br>".json_encode($setProgram, JSON_PRETTY_PRINT)."<
 [&#8657;](#php-qivivoapi)
 <img align="right" src="/readmeAssets/changes.png" width="48">
 ## Version history
+
+#### v0.5 (2018-12-27)
+- New: setZoneMode($zone, $mode)
 
 #### v0.4 (2018-03-27)
 - fix for Qivivo https switch
