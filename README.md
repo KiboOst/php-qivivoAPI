@@ -15,6 +15,7 @@ If you need a simple api to use official Qivivo API without headaches: [php-simp
 <img align="right" src="Jeedom/Assets/logoJeedom.png" width="64">
 
 Jeedom user ? Check this [example](https://github.com/KiboOst/php-qivivoAPI/tree/master/Jeedom) of integration into Jeedom!
+Now also as a [Jeedom Plugin !](https://github.com/KiboOst/jeedom-qivivo)
 
 ### Use case example
 - Get your Qivivo data to trigger other actions.<br />
