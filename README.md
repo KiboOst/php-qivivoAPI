@@ -187,6 +187,9 @@ echo "<pre>_____>setProgram:<br>".json_encode($setProgram, JSON_PRETTY_PRINT)."<
 <img align="right" src="/readmeAssets/changes.png" width="48">
 ## Version history
 
+#### v0.6 (2019-05-26)
+- Qivivo servers switch to Comap.
+
 #### v0.5 (2018-12-27)
 - New: setZoneMode($zone, $mode)
 
