@@ -7,7 +7,7 @@ https://github.com/KiboOst/php-qivivoAPI
 
 class qivivoAPI {
 
-    public $_version = '0.5';
+    public $_version = '0.6';
 
     //USER FUNCTIONS======================================================
     //GET FUNCTIONS:
@@ -114,15 +114,16 @@ class qivivoAPI {
         $url = $this->_urlRoot.'/synthese/month';
         $post = 'dateStart='.$dateStart.'&dateEnd='.$dateEnd;
         $answer = $this->_request('POST', $url, $post, $xmlRequest=true);
+        echo $answer;
         $jsonAnswer = json_decode($answer, true);
-        if (!isset($jsonAnswer['success'])) return array('result'=>null, 'error'=>$jsonAnswer);
+        if ($jsonAnswer['success'] != 'success') return array('result'=>null, 'error'=>$jsonAnswer['success']);
         unset($jsonAnswer['content']['synthesisData']['success']);
         return array('result'=>$jsonAnswer['content']['synthesisData']);
     }
 
     public function getProducts()
     {
-        $url = 'https://www.qivivo.com/fr/mon-compte/produits';
+        $url = 'https://www.comapsmarthome.com/fr/mon-compte/produits';
         $answer = $this->_request('GET', $url);
 
         //load it as html document:
@@ -191,7 +192,7 @@ class qivivoAPI {
         if ($myID) $post .= $myID;
         $answer = $this->_request('POST', $url, $post, $xmlRequest=true);
         $jsonAnswer = json_decode($answer, true);
-        if (!isset($jsonAnswer['success']['state'])) return array('result'=>null, 'error'=>$jsonAnswer);
+        if ($jsonAnswer['success']['state'] != 'success') return array('result'=>null, 'error'=>$jsonAnswer['success']);
         return array('result'=>true);
     }
 
@@ -212,7 +213,7 @@ class qivivoAPI {
             $post = 'wantedMode='.$mode.'&programId='.$programId;
             $answer = $this->_request('POST', $url, $post, $xmlRequest=true);
             $jsonAnswer = json_decode($answer, true);
-            if (!isset($jsonAnswer['success']['state'])) return array('result'=>null, 'error'=>$jsonAnswer);
+            if ($jsonAnswer['success']['state'] != 'success') return array('result'=>null, 'error'=>$jsonAnswer['success']);
             return array('result'=>true);
         }
         return array('result'=>null, 'error'=>'unfound zone');
@@ -238,7 +239,7 @@ class qivivoAPI {
         $post = 'state='.$state;
         $answer = $this->_request('POST', $url, $post, $xmlRequest=true);
         $jsonAnswer = json_decode($answer, true);
-        if (!isset($jsonAnswer['success']['state'])) return array('result'=>null, 'error'=>$jsonAnswer);
+        if ($jsonAnswer['success']['state'] != 'success') return array('result'=>null, 'error'=>$jsonAnswer['success']);
         return array('result'=>true);
 
     }
@@ -251,7 +252,7 @@ class qivivoAPI {
         $post = $code.'='.strval($value);
         $answer = $this->_request('POST', $url, $post, $xmlRequest=true);
         $jsonAnswer = json_decode($answer, true);
-        if (!isset($jsonAnswer['success']['state'])) return array('result'=>null, 'error'=>$jsonAnswer);
+        if ($jsonAnswer['success']['state'] != 'success') return array('result'=>null, 'error'=>$jsonAnswer['success']);
         return array('result'=>true);
     }
 
@@ -265,7 +266,7 @@ class qivivoAPI {
         $post = 'dayNumber='.$days;
         $answer = $this->_request('POST', $url, $post, $xmlRequest=true);
         $jsonAnswer = json_decode($answer, true);
-        if (!isset($jsonAnswer['success']['state'])) return array('result'=>null, 'error'=>$jsonAnswer);
+        if ($jsonAnswer['success']['state'] != 'success') return array('result'=>null, 'error'=>$jsonAnswer['success']);
         return array('result'=>true);
     }
 
@@ -303,8 +304,7 @@ class qivivoAPI {
             $postDatas = str_replace(array('%3D', '%26'), array('=', '&'), $postDatas);
             $answer = $this->_request('POST', $url, $postDatas, $xmlRequest=true);
             $jsonAnswer = json_decode($answer, true);
-            if (!isset($jsonAnswer['success']['state'])) return array('result'=>null, 'error'=>$jsonAnswer);
-            if ($jsonAnswer['success']['state'] != 'success') return array('result'=>null, 'error'=>$jsonAnswer);
+            if ($jsonAnswer['success']['state'] != 'success') return array('result'=>null, 'error'=>$jsonAnswer['success']);
             $dayId += 1;
         }
         return array('result'=>true);
@@ -373,7 +373,7 @@ class qivivoAPI {
             curl_setopt($this->_curlHdl, CURLOPT_HEADER, true);
             curl_setopt($this->_curlHdl, CURLOPT_SSL_VERIFYHOST, false);
             curl_setopt($this->_curlHdl, CURLOPT_SSL_VERIFYPEER, false);
-            curl_setopt($this->_curlHdl, CURLOPT_REFERER, 'https://www.qivivo.com/account/');
+            curl_setopt($this->_curlHdl, CURLOPT_REFERER, 'https://www.comapsmarthome.com/account/');
             curl_setopt($this->_curlHdl, CURLOPT_USERAGENT, 'User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:51.0) Gecko/20100101 Firefox/51.0');
             curl_setopt($this->_curlHdl, CURLOPT_ENCODING , 'gzip, deflate');
         }
@@ -395,8 +395,8 @@ class qivivoAPI {
                 curl_setopt($this->_curlHdl, CURLOPT_HEADER, false);
                 curl_setopt($this->_curlHdl, CURLOPT_HTTPHEADER, array(
                                                         'Connection: keep-alive',
-                                                        'Origin: https://www.qivivo.com',
-                                                        'Referer: https://www.qivivo.com/fr/login',
+                                                        'Origin: https://www.comapsmarthome.com',
+                                                        'Referer: https://www.comapsmarthome.com/fr/login',
                                                         'Upgrade-Insecure-Requests: 1',
                                                         'Accept-Encoding: gzip',
                                                         'Content-Type: application/x-www-form-urlencoded',
@@ -416,11 +416,12 @@ class qivivoAPI {
         {
             curl_setopt($this->_curlHdl, CURLOPT_HEADER, false);
             curl_setopt($this->_curlHdl, CURLOPT_HTTPHEADER, array(
-                                                    'Host: www.qivivo.com',
+                                                    'Host: www.comapsmarthome.com',
                                                     'Accept: */*',
                                                     'Accept-Language: fr-FR,fr;q=0.8,en-US;q=0.5,en;q=0.3',
                                                     'Accept-Encoding: gzip',
-                                                    'Referer: https://www.qivivo.com/account/',
+                                                    'Origin: https://www.comapsmarthome.com',
+                                                    'Referer: https://www.comapsmarthome.com/fr/dashboard/',
                                                     'Content-Type: application/x-www-form-urlencoded',
                                                     'X-Requested-With: XMLHttpRequest',
                                                     'Connection: keep-alive'
@@ -430,10 +431,12 @@ class qivivoAPI {
 
 
         $response = curl_exec($this->_curlHdl);
+        return $response;
 
         //$info   = curl_getinfo($this->_curlHdl);
         //echo "<pre>cURL info".json_encode($info, JSON_PRETTY_PRINT)."</pre><br>";
 
+        /*
         if(curl_errno($this->_curlHdl))
         {
             echo 'Curl error: '.curl_error($this->_curlHdl);
@@ -447,6 +450,7 @@ class qivivoAPI {
         {
             return $response;
         }
+        */
     }
 
     //AUTHORIZATION=======================================================
@@ -460,9 +464,9 @@ class qivivoAPI {
 
     protected $_qivivo_user;
     protected $_qivivo_pass;
-    protected $_urlAuth = 'https://www.qivivo.com/fr/login';
-    protected $_urlAuthCheck = 'https://www.qivivo.com/fr/login_check';
-    protected $_urlRoot = 'https://www.qivivo.com/account';
+    protected $_urlAuth = 'https://www.comapsmarthome.com/fr/login';
+    protected $_urlAuthCheck = 'https://www.comapsmarthome.com/fr/login_check';
+    protected $_urlRoot = 'https://www.comapsmarthome.com/account';
     protected $_curlHdl = null;
     protected $_cookFile = '';
     protected $_zoneModes = ['Thermostat', null, null, 'Confort', 'Eco', 'Arret', 'Hors-gel', 'Confort -1', 'Confort -2'];
