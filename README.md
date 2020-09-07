@@ -10,9 +10,7 @@ The official Qivivo API doesn't provide any function yet for multi-zone.
 
 If you need a simple api to use official Qivivo API without headaches: [php-simpleQivivoAPI](https://github.com/KiboOst/php-simpleQivivoAPI)
 
-<img align="right" src="Jeedom/Assets/logoJeedom.png" width="64">
-
-Jeedom user ? Check this  [Jeedom Plugin !](https://kiboost.github.io/jeedom_docs/plugins/qivivo/fr_FR/).
+Jeedom user ? Check this  [Jeedom Plugin !](https://kiboost.github.io/jeedom_docs/plugins/qivivo/fr_FR/)
 
 ### Use case example
 - Get your Qivivo data to trigger other actions.<br />
