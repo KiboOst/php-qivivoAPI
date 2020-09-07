@@ -70,9 +70,13 @@ echo "<pre>_____>heating:<br>".json_encode($heating, JSON_PRETTY_PRINT)."</pre><
 $settings = $_qivivo->getTempSettings();
 echo "<pre>_____>settings:<br>".json_encode($settings, JSON_PRETTY_PRINT)."</pre><br>";
 
-//get products with info (serial number, firmware, etc.):
-$getProducts = $_qivivo->getProducts();
-echo "<pre>_____>getProducts:<br>".json_encode($getProducts['result'], JSON_PRETTY_PRINT)."</pre><br>";
+//get devices with info (serial number, firmware, etc.):
+$getDevice = $_qivivo->getDevice();
+echo "<pre>_____>getDevice:<br>".json_encode($getDevice['result'], JSON_PRETTY_PRINT)."</pre><br>";
+
+//get array of serial=>devices with zone, current order etc:
+$getFullDevices = $_qivivo->getFullDevices();
+echo "<pre>_____>getFullDevices:<br>".json_encode($getFullDevices['result'], JSON_PRETTY_PRINT)."</pre><br>";
 
 //get zones, with name, id, type, connected objects serials:
 $getZones = $_qivivo->getZones();

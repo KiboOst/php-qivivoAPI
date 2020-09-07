@@ -72,7 +72,7 @@ class qivivoAPI {
 
     public function getSchedules() //@return['result'] array with readable formated program
     {
-        if ( isset($this->_houseData['schedules'])) {
+        if ( isset($this->_houseData['schedules']) ) {
             return array('result'=>$this->_houseData['schedules']);
         }
 
@@ -97,11 +97,12 @@ class qivivoAPI {
         return array('error'=>'No current program found');
     }
 
-    public function getProducts() //@return['result'] array with products
+    public function getDevice() //@return['result'] array with devices
     {
         $url = $this->_urlRoot.'/park/housings/'.$this->_houseData['id'].'/connected-objects';
         $answer = $this->_request('GET', $url);
         $jsonData = json_decode($answer, true);
+        $this->_houseData['devices'] = $jsonData;
         return array('result'=>$jsonData);
     }
 
@@ -126,6 +127,54 @@ class qivivoAPI {
         $answer = $this->_request('GET', $url);
         $jsonData = json_decode($answer, true);
         return array('result'=>$jsonData);
+    }
+
+    public function getFullDevices() //@return['result'] array of devices with zone, order, by serial number
+    {
+        if ( !isset($this->_houseData['devices']) ) {
+            $this->getDevice();
+        }
+
+        $products = $this->_houseData['devices'];
+        $Devices = [];
+        foreach ($products as $device) {
+            $serial = $device['serial_number'];
+            unset($device['serial_number']);
+            $Devices[$serial] = $device;
+        }
+
+        //get devices zones and order:
+        if ( !isset($this->_houseData['zones']) ) {
+            $this->getZones();
+        }
+
+
+        $zones = $this->_houseData['zones'];
+        foreach ($zones as $zone) {
+            $zoneName = $zone['title'];
+            //get zone order:
+            foreach ($this->_houseData['heating']['zones'] as $heatingZone) {
+                if ($heatingZone['id'] == $zone['id']) {
+                    if ($zone['instruction_type'] == 'temperature') {
+                        $order = $heatingZone['set_point']['instruction'];
+                        $status = $heatingZone['heating_status'];
+                    } else {
+                        $order = $heatingZone['set_point']['instruction'];
+                        $status = null;
+                    }
+                }
+            }
+
+            foreach ($Devices as $serial => $device) {
+                if (in_array($serial, $zone['connected_objects'])) {
+                    $Devices[$serial]['zone'] = $zoneName;
+                    $Devices[$serial]['order'] = $order;
+                    $Devices[$serial]['heating_status'] = $status;
+                    break;
+                }
+            }
+        }
+        return array('result'=>$Devices);
     }
 
 
