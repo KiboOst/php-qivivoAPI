@@ -71,8 +71,8 @@ $settings = $_qivivo->getTempSettings();
 echo "<pre>_____>settings:<br>".json_encode($settings, JSON_PRETTY_PRINT)."</pre><br>";
 
 //get devices with info (serial number, firmware, etc.):
-$getDevice = $_qivivo->getDevice();
-echo "<pre>_____>getDevice:<br>".json_encode($getDevice['result'], JSON_PRETTY_PRINT)."</pre><br>";
+$getDevices = $_qivivo->getDevices();
+echo "<pre>_____>getDevices:<br>".json_encode($getDevices['result'], JSON_PRETTY_PRINT)."</pre><br>";
 
 //get array of serial=>devices with zone, current order etc:
 $getFullDevices = $_qivivo->getFullDevices();

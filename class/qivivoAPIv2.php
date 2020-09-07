@@ -97,7 +97,7 @@ class qivivoAPI {
         return array('error'=>'No current program found');
     }
 
-    public function getDevice() //@return['result'] array with devices
+    public function getDevices() //@return['result'] array with devices
     {
         $url = $this->_urlRoot.'/park/housings/'.$this->_houseData['id'].'/connected-objects';
         $answer = $this->_request('GET', $url);
@@ -132,7 +132,7 @@ class qivivoAPI {
     public function getFullDevices() //@return['result'] array of devices with zone, order, by serial number
     {
         if ( !isset($this->_houseData['devices']) ) {
-            $this->getDevice();
+            $this->getDevices();
         }
 
         $products = $this->_houseData['devices'];
