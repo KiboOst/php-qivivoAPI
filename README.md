@@ -2,20 +2,17 @@
 
 # php-qivivoAPI
 
-## php API for Smart Qivivo Thermostat
+## php API for Smart Qivivo / Comap Thermostat
 
-This php API allows you to control your Smart Qivivo Thermostat.
+This php API allows you to control your Smart Qivivo / Comap Thermostat.
 
 The official Qivivo API doesn't provide any function yet for multi-zone.
-In browser/app, at this time, when using multi-zone, Qivivo doesn't provide option to store/load different programs for each zone.<br />
-So I developed this API in a few hours part-time to be able to do it, and not have to manually change each period of each day for each zone!<br />
 
 If you need a simple api to use official Qivivo API without headaches: [php-simpleQivivoAPI](https://github.com/KiboOst/php-simpleQivivoAPI)
 
 <img align="right" src="Jeedom/Assets/logoJeedom.png" width="64">
 
-Jeedom user ? Check this [example](https://github.com/KiboOst/php-qivivoAPI/tree/master/Jeedom) of integration into Jeedom!
-Now also as a [Jeedom Plugin !](https://kiboost.github.io/jeedom_docs/plugins/qivivo/fr_FR/) with full support of multi-zone and plannings.
+Jeedom user ? Check this  [Jeedom Plugin !](https://kiboost.github.io/jeedom_docs/plugins/qivivo/fr_FR/).
 
 ### Use case example
 - Get your Qivivo data to trigger other actions.<br />
@@ -24,7 +21,6 @@ Now also as a [Jeedom Plugin !](https://kiboost.github.io/jeedom_docs/plugins/qi
 - Set your heating if your interior camera recognize you.<br />
 - As Qivivo doesn't support IFTTT yet, you can make your own trigger script!
 
-*It is developed with a french account, so some data like days in programs will be in french. I can do it in en if other users need it. Feel free to submit an issue or pull request to add more.*
 
 *This isn't an official API | USE AT YOUR OWN RISK!<br />
 This API is reverse-engineered, provided for research and development for interoperability.*<br />
@@ -46,7 +42,7 @@ This API is reverse-engineered, provided for research and development for intero
 [&#8657;](#php-qivivoapi)
 <img align="right" src="/readmeAssets/howto.png" width="48">
 ## How-to
-- Download class/qivivoAPI.php and put it on your server.
+- Download class/qivivoAPIv2.php and put it on your server.
 - Include qivivoAPI.php in your script.
 - Start it with your Qivivo username/password.
 All function should return an array with 'result' or 'error'. So you can check for 'error' before getting 'result': if (!isset($answer['error']) ...
@@ -56,7 +52,7 @@ All function should return an array with 'result' or 'error'. So you can check f
 #### Connection
 
 ```php
-require($_SERVER['DOCUMENT_ROOT'].'/path/to/qivivoAPI.php');
+require($_SERVER['DOCUMENT_ROOT'].'/path/to/qivivoAPIv2.php');
 $_qivivo = new qivivoAPI($qivivo_user, $qivivo_pass);
 if (isset($_qivivo->error)) echo $_qivivo->error;
 ```
@@ -67,51 +63,38 @@ Let the fun begin:
 #### READING OPERATIONS<br />
 
 ```php
-//you can get all datas from thermostat and parse them if you need:
-echo "<pre>_____>_qivivo:<br>".json_encode($_qivivo, JSON_PRETTY_PRINT)."</pre><br>";
-
-//get home temperatures and temperatures settings:
-$temps = $_qivivo->getTemperatures();
-echo "<pre>_____>temps:<br>".json_encode($temps, JSON_PRETTY_PRINT)."</pre><br>";
-
-//get actual mode of a non-thermostat zone: will return Confort -2, Confort -1, Hors-gel, Arrêt, Eco or Confort
-$getZoneMode = $_qivivo->getZoneMode('Chambres');
-echo "<pre>_____>getZoneMode:<br>".json_encode($getZoneMode, JSON_PRETTY_PRINT)."</pre><br>";
 
 //get heating:
 $heating = $_qivivo->getHeating();
 echo "<pre>_____>heating:<br>".json_encode($heating, JSON_PRETTY_PRINT)."</pre><br>";
 
-//get weather:
-$weather = $_qivivo->getWeather();
-echo "<pre>_____>weather:<br>".json_encode($weather, JSON_PRETTY_PRINT)."</pre><br>";
+//get temperatures settings:
+$settings = $_qivivo->getTempSettings();
+echo "<pre>_____>settings:<br>".json_encode($settings, JSON_PRETTY_PRINT)."</pre><br>";
 
-//get synthesis between two datas
-//date format yearmonthdayhour. You can ask synthesis for a month, or just one dey like this for example:
-$getSynthesis = $_qivivo->getSynthesis(201711050000, 201711060000);
-echo "<pre>_____>getSynthesis:<br>".json_encode($getSynthesis, JSON_PRETTY_PRINT)."</pre><br>";
-
-//get products with info (serial number, firmware, etc.)
+//get products with info (serial number, firmware, etc.):
 $getProducts = $_qivivo->getProducts();
 echo "<pre>_____>getProducts:<br>".json_encode($getProducts['result'], JSON_PRETTY_PRINT)."</pre><br>";
 
-//get current program:
-//will return array with zone thermostat, and others zones if multizone is activated.
+//get zones, with name, id, type, connected objects serials:
+$getZones = $_qivivo->getZones();
+echo "<pre>_____>getZones:<br>".json_encode($getZones, JSON_PRETTY_PRINT)."</pre><br>";
+
+//get name of current program:
 $getCurrentProgram = $_qivivo->getCurrentProgram();
 echo "<pre>_____>getCurrentProgram:<br>".json_encode($getCurrentProgram, JSON_PRETTY_PRINT)."</pre><br>";
 
-//get program by name:
-/*Will return readable datas like:
-"Lundi": {
-        "0:0 | 5:59": "nuit",
-        "6:0 | 7:59": "pres_2",
-        "8:0 | 17:29": "absence",
-        "17:30 | 21:59": "pres_1",
-        "22:0 | 23:59": "nuit"
-    },
-*/
-$getProgram = $_qivivo->getProgram('programme 1');
-echo "<pre>_____>getProgram:<br>".json_encode($getProgram, JSON_PRETTY_PRINT)."</pre><br>";
+//get all programs, with shedule id per zone:
+$getPrograms = $_qivivo->getPrograms();
+echo "<pre>_____>getPrograms:<br>".json_encode($getPrograms, JSON_PRETTY_PRINT)."</pre><br>";
+
+//get all shedules, with days time slots:
+$getSchedules = $_qivivo->getSchedules();
+echo "<pre>_____>getSchedules:<br>".json_encode($getSchedules, JSON_PRETTY_PRINT)."</pre><br>";
+
+//get weather:
+$weather = $_qivivo->getWeather();
+echo "<pre>_____>weather:<br>".json_encode($weather, JSON_PRETTY_PRINT)."</pre><br>";
 
 ```
 
@@ -121,71 +104,57 @@ echo "<pre>_____>getProgram:<br>".json_encode($getProgram, JSON_PRETTY_PRINT)."<
 
 ```php
 //change heating:
-$setHeatingPower = $_qivivo->setHeatingPower(true);
-echo "<pre>_____>setHeatingPower:<br>".json_encode($setHeatingPower, JSON_PRETTY_PRINT)."</pre><br>";
+$setHeating = $_qivivo->setHeating(true);
 
-//set thermostat temperature
-$setTemperature = $_qivivo->setTemperature(17.5, false);
-echo "<pre>_____>setTemperature:<br>".json_encode($setTemperature, JSON_PRETTY_PRINT)."</pre><br>";
+//set thermostat temperature (Second argument is duration in minutes, can be omitted default 120. Last argument not necessary if one thermostat only):
+$setTemperature = $_qivivo->setTemperature(15, 120, 'Salle');
 
-//set zone mode:
-//available modes are: confort -2 -> 8, confort -1 -> 7, Hors-Gel -> 6, Arrêt -> 5, Eco -> 4, confort -> 3
-$setZoneMode = $_qivivo->setZoneMode('MyRoom', 7);
-echo "<pre>_____>setZoneMode:<br>".json_encode($setZoneMode['result'], JSON_PRETTY_PRINT)."</pre><br>";
+//set zone mode (Second argument is duration in minutes):
+//available modes are: 'stop', 'eco', 'comfort_minus2', 'comfort_minus1', 'comfort'
+$setZoneMode = $_qivivo->setZoneMode('comfort_minus1', 120, 'Chambres');
+
+//change running program:
+$_qivivo->setProgram('Absence');
+
 
 //change temperatures settings:
-//available settings are: 'pres_1', 'pres_2', 'pres_3', 'pres_4', 'confort', 'nuit', 'hg', 'absence'
-$setTempSettings = $_qivivo->setTempSettings('pres_1', 19.5);
-echo "<pre>_____>setTempSettings:<br>".json_encode($setTempSettings, JSON_PRETTY_PRINT)."</pre><br>";
+$settingsAr = array(
+                    "away"=>15.5,
+                    "frost_protection"=>12,
+                    "night"=>17.5,
+                    "connected"=>array(
+                                    "presence_1"=>18,
+                                    "presence_2"=>19,
+                                    "presence_3"=>20,
+                                    "presence_4"=>20.5
+                                ),
+                    "smart"=>array(
+                                "comfort"=>19
+                            )
+                );
+$_qivivo->setTempSettings($settingsAr);
 
-//set departure alert setting, in day number:
-$setDepartureAlert = $_qivivo->setDepartureAlert(2);
-echo "<pre>_____>setDepartureAlert:<br>".json_encode($setDepartureAlert, JSON_PRETTY_PRINT)."</pre><br>";
 
-//change program:
-/*
-There is two sorts of programs, for thermostat zone or other zones.
-- Thermostat zone available values are:
-'pres_1', 'pres_2', 'pres_3', 'pres_4', 'confort', 'nuit', 'hg', 'absence'
-- Other zone values are:
-'mz_comfort', 'mz_comfort_minus_one', 'mz_comfort_minus_two', 'mz_eco', 'mz_frost', 'mz_off'
+//set /cancel away:
+$_qivivo->setAway();
+$_qivivo->cancelAway();
 
-You will first have to build an array for all days starting from monday, with periods and setting.
-You can store different arrays for different programs, and just change them in a few seconds.
-*/
-//change thermostat zone program example:
-$dayType1 = [['0:0', '5:29', 'nuit'],
-             ['5:30', '8:14', 'pres_3'],
-             ['8:15', '15:59', 'nuit'],
-             ['16:0', '17:29', 'pres_2'],
-             ['17:30', '23:59', 'pres_3']];
-$dayType2 = [['0:0', '7:29', 'nuit'],
-             ['7:30', '21:59', 'pres_3'],
-             ['22:0', '23:59', 'pres_2']];
-$myWorkMasterProgram = [$dayType1, $dayType1, $dayType2, $dayType1, $dayType1, $dayType2, $dayType2];
-$setProgram = $_qivivo->setProgram('Semaine Travail', $myWorkMasterProgram);
-echo "<pre>_____>setProgram:<br>".json_encode($setProgram, JSON_PRETTY_PRINT)."</pre><br>";
+//set / cancel departure:
+$startDate = "2020-09-03T22:00:00.000Z";
+$endDate = "2020-09-13T12:00:00.000Z";
+$_qivivo->setDeparture($startDate, $endDate);
+$_qivivo->cancelDeparture();
 
-//change other zone program example:
-$dayType1 = [['0:0', '5:29', 'mz_eco'],
-             ['5:30', '7:59', 'mz_comfort'],
-             ['8:0', '17:29', 'mz_eco'],
-             ['17:30', '21:59', 'mz_comfort_minus_one'],
-             ['22:0', '23:59', 'mz_eco']];
-$dayType2 = [['0:0', '5:29', 'mz_eco'],
-             ['5:30', '9:29', 'mz_comfort'],
-             ['9:30', '17:29', 'mz_comfort_minus_two'],
-             ['17:30', '21:59', 'mz_comfort_minus_one'],
-             ['22:0', '23:59', 'mz_eco']];
-$myWorkZoneProgram = [$dayType1, $dayType1, $dayType2, $dayType1, $dayType1, $dayType2, $dayType2];
-$setProgram = $_qivivo->setProgram('mz_Chambres', $myWorkZoneProgram);
-echo "<pre>_____>setProgram:<br>".json_encode($setProgram, JSON_PRETTY_PRINT)."</pre><br>";
 
 ```
 
 [&#8657;](#php-qivivoapi)
 <img align="right" src="/readmeAssets/changes.png" width="48">
 ## Version history
+
+#### v2.0 (2020-09-07)
+- New v2 version for new Comap interface!
+Read the doc : Lot of changes in functions and returns. Less functions regarding programs as all is editable in Comap interface now!
 
 #### v0.6 (2019-05-26)
 - Qivivo servers switch to Comap.
@@ -213,7 +182,7 @@ echo "<pre>_____>setProgram:<br>".json_encode($setProgram, JSON_PRETTY_PRINT)."<
 
 The MIT License (MIT)
 
-Copyright (c) 2018 KiboOst
+Copyright (c) 2020 KiboOst
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
