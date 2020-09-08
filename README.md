@@ -135,10 +135,7 @@ $settingsAr = array(
                                     "presence_2"=>19,
                                     "presence_3"=>20,
                                     "presence_4"=>20.5
-                                ),
-                    "smart"=>array(
-                                "comfort"=>19
-                            )
+                                )
                 );
 $_qivivo->setTempSettings($settingsAr);
 
