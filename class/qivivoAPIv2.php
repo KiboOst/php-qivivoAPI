@@ -121,6 +121,17 @@ class qivivoAPI {
         return array('result'=>$jsonData);
     }
 
+    public function getZoneEvents($zoneName='')//@return['result'] array with zone events
+    {
+        $zones = $this->_houseData['heating']['zones'];
+        foreach ($zones as $zone) {
+            if ($zone['title'] == $zoneName) {
+                return array('result'=>$zone['events']);
+            }
+        }
+        return array('error'=>'Could not find this Zone');
+    }
+
     public function getWeather() //@return['result'] array with weather datas
     {
         $url = $this->_urlRoot.'/weather/weather/current?housing_id='.$this->_houseData['id'];
@@ -236,7 +247,7 @@ class qivivoAPI {
     public function setZoneMode($mode, $period=120, $zoneName=null) //@return['result'] true, @return['error'] if any
     {
         if (!$mode || !$zoneName) return array('error'=>'You must specify mode name, period in minutes, zone name.');
-        $availValues = ['stop', 'eco', 'comfort_minus2', 'comfort_minus1', 'comfort'];
+        $availValues = ['stop', 'frost_protection', 'eco', 'comfort_minus2', 'comfort_minus1', 'comfort'];
         if (!in_array($mode, $availValues)) return array('result'=>null, 'error'=>'Got wrong value, should be in '.implode(', ', $availValues));
 
         $zoneId = null;

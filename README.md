@@ -82,6 +82,10 @@ echo "<pre>_____>getFullDevices:<br>".json_encode($getFullDevices['result'], JSO
 $getZones = $_qivivo->getZones();
 echo "<pre>_____>getZones:<br>".json_encode($getZones, JSON_PRETTY_PRINT)."</pre><br>";
 
+//get zone events (temporary_instruction, ...):
+$getZoneEvents = $_qivivo->getZoneEvents('Chambres');
+echo "<pre>_____>getZoneEvents:<br>".json_encode($getZoneEvents, JSON_PRETTY_PRINT)."</pre><br>";
+
 //get name of current program:
 $getCurrentProgram = $_qivivo->getCurrentProgram();
 echo "<pre>_____>getCurrentProgram:<br>".json_encode($getCurrentProgram, JSON_PRETTY_PRINT)."</pre><br>";
