@@ -6,10 +6,6 @@
 
 This php API allows you to control your Smart Qivivo / Comap Thermostat.
 
-The official Qivivo API doesn't provide any function yet for multi-zone.
-
-If you need a simple api to use official Qivivo API without headaches: [php-simpleQivivoAPI](https://github.com/KiboOst/php-simpleQivivoAPI)
-
 Jeedom user ? Check this  [Jeedom Plugin !](https://kiboost.github.io/jeedom_docs/plugins/qivivo/fr_FR/)
 
 ### Use case example
