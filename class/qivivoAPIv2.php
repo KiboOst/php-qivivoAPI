@@ -312,7 +312,7 @@ class qivivoAPI {
 
         foreach($programs as $program)
         {
-            if ($program['is_activated'] == false && $program['title'] == $name) {
+            if ($program['title'] == $name) {
                 $id = $program['id'];
                 $url = $this->_urlRoot.'/thermal/housings/'.$this->_houseData['id'].'/programs/'.$id.'/activate';
                 $answer = $this->_request('POST', $url, null);
