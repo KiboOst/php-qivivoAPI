@@ -110,18 +110,20 @@ echo "<pre>_____>weather:<br>".json_encode($weather, JSON_PRETTY_PRINT)."</pre><
 
 ```php
 //change heating:
-$setHeating = $_qivivo->setHeating(true);
+$_qivivo->setHeating(true);
 
 //set thermostat temperature (Second argument is duration in minutes, can be omitted default 120. Last argument not necessary if one thermostat only):
-$setTemperature = $_qivivo->setTemperature(15, 120, 'Salle');
+$_qivivo->setTemperature(15, 120, 'Salle');
 
 //set zone mode (Second argument is duration in minutes):
 //available modes are: 'stop', 'eco', 'comfort_minus2', 'comfort_minus1', 'comfort'
-$setZoneMode = $_qivivo->setZoneMode('comfort_minus1', 120, 'Chambres');
+$_qivivo->setZoneMode('comfort_minus1', 120, 'Chambres');
+
+//cancel zone order:
+$_qivivo->cancelZoneOrder('Chambres');
 
 //change running program:
 $_qivivo->setProgram('Absence');
-
 
 //change temperatures settings:
 $settingsAr = array(
@@ -139,7 +141,6 @@ $settingsAr = array(
                             )
                 );
 $_qivivo->setTempSettings($settingsAr);
-
 
 //set /cancel away:
 $_qivivo->setAway();

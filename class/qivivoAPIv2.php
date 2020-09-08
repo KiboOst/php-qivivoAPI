@@ -252,7 +252,7 @@ class qivivoAPI {
 
         $zoneId = null;
         $zones = $this->_houseData['heating']['zones'];
-        foreach($zones as $zone)
+        foreach ($zones as $zone)
         {
             if ($zone['title'] == $zoneName) {
                 $zoneId = $zone['id'];
@@ -274,6 +274,31 @@ class qivivoAPI {
             return array('result'=>true);
         } else {
             return array('error'=>'error while changing zone mode');
+        }
+    }
+
+    public function cancelZoneOrder($zoneName='') //@return['result'] true, @return['error'] if any
+    {
+        $zoneId = null;
+        $zones = $this->_houseData['heating']['zones'];
+        foreach ($zones as $zone)
+        {
+            if ($zone['title'] == $zoneName) {
+                $zoneId = $zone['id'];
+                break;
+            }
+        }
+        if (!$zoneId) {
+            return array('error'=>'Could not find zone.');
+        }
+
+        $url = $this->_urlRoot.'/thermal/housings/'.$this->_houseData['id'].'/thermal-control/zones/'.$zoneId.'/temporary-instruction';
+        $answer = $this->_request('DELETE', $url, null);
+
+        if ($this->isJson($answer)) {
+            return array('result'=>true);
+        } else {
+            return array('error'=>'error while setting departure');
         }
     }
 
