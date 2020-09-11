@@ -7,7 +7,7 @@ https://github.com/KiboOst/php-qivivoAPI
 
 class qivivoAPI {
 
-    public $_version = '2.0';
+    public $_version = '2.02';
 
     //USER FUNCTIONS======================================================
     //GET FUNCTIONS:
@@ -121,7 +121,7 @@ class qivivoAPI {
         return array('result'=>$jsonData);
     }
 
-    public function getZoneEvents($zoneName='')//@return['result'] array with zone events
+    public function getZoneEvents($zoneName='') //@zoneName | @return['result'] array with zone events
     {
         $zones = $this->_houseData['heating']['zones'];
         foreach ($zones as $zone) {
@@ -130,6 +130,16 @@ class qivivoAPI {
             }
         }
         return array('error'=>'Could not find this Zone');
+    }
+
+    public function hasTimeOrder($zoneName='') //@zoneName | @return['result'] true, @return['error'] if any
+    {
+        $zoneEvents = $this->getZoneEvents($zoneName);
+        if (isset($zoneEvents['error'])) return $zoneEvents;
+        if (isset($zoneEvents['result']['temporary_instruction']['set_point'])) {
+            return array('result'=>true);
+        }
+        return array('result'=>false);
     }
 
     public function getWeather() //@return['result'] array with weather datas
@@ -216,6 +226,8 @@ class qivivoAPI {
     {
         //get thermostat zone id:
         if ($this->_houseData == null) $datas = $this->getDatas();
+
+        $zoneId = null;
         $zones = $this->_houseData['heating']['zones'];
         foreach($zones as $zone)
         {
@@ -232,6 +244,13 @@ class qivivoAPI {
                 }
             }
         }
+
+        if (!$zoneId) {
+            return array('error'=>'Could not find zone.');
+        }
+
+        $hasTimeOrder = $this->hasTimeOrder($zoneName);
+        if ($hasTimeOrder['result']) $this->cancelZoneOrder($zoneName);
 
         $post = '{"duration":'.$period.',"set_point":{"instruction":'.$value.'}}';
         $url = $this->_urlRoot.'/thermal/housings/'.$this->_houseData['id'].'/thermal-control/zones/'.$zoneId.'/temporary-instruction';
@@ -265,6 +284,9 @@ class qivivoAPI {
         if (!$zoneId) {
             return array('error'=>'Could not find zone.');
         }
+
+        $hasTimeOrder = $this->hasTimeOrder($zoneName);
+        if ($hasTimeOrder['result']) $this->cancelZoneOrder($zoneName);
 
         $post = '{"duration":'.$period.',"set_point":{"instruction":"'.$mode.'"}}';
         $url = $this->_urlRoot.'/thermal/housings/'.$this->_houseData['id'].'/thermal-control/zones/'.$zoneId.'/temporary-instruction';

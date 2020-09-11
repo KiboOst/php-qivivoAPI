@@ -98,6 +98,16 @@ echo "<pre>_____>getSchedules:<br>".json_encode($getSchedules, JSON_PRETTY_PRINT
 $weather = $_qivivo->getWeather();
 echo "<pre>_____>weather:<br>".json_encode($weather, JSON_PRETTY_PRINT)."</pre><br>";
 
+//get zone events (temporary order, ...):
+$getZoneEvents = $_qivivo->getZoneEvents('Chambres');
+echo "<pre>_____>getZoneEvents:<br>".json_encode($getZoneEvents, JSON_PRETTY_PRINT)."</pre><br>";
+
+//Does zone has temporary order:
+$hasTimeOrder = $_qivivo->hasTimeOrder('Chambres');
+echo "<pre>_____>hasTimeOrder:<br>".json_encode($hasTimeOrder, JSON_PRETTY_PRINT)."</pre><br>";
+
+
+
 ```
 
 [&#8657;](#php-qivivoapi)
@@ -151,6 +161,11 @@ $_qivivo->cancelDeparture();
 [&#8657;](#php-qivivoapi)
 <img align="right" src="/readmeAssets/changes.png" width="48">
 ## Version history
+
+#### v2.02 (2020-09-11)
+- getZoneEvents()
+- hasTimeOrder()
+- cancelZoneOrder()
 
 #### v2.0 (2020-09-07)
 - New v2 version for new Comap interface!
