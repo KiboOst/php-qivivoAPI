@@ -258,7 +258,16 @@ class qivivoAPI {
         $answer = $this->_request('POST', $url, $post);
 
         if ($this->isJson($answer)) {
-            return array('result'=>true);
+            $jsonData = json_decode($answer, true);
+            if (isset($jsonData['set_point']['instruction']) && isset($jsonData['heating_status'])) {
+                return array('result'=>
+                                array('instruction'=>$jsonData['set_point']['instruction'],
+                                      'heating_status'=>$jsonData['heating_status']
+                                  )
+                            );
+            } else {
+                return array('error'=>'cannot get new order.');
+            }
         } else {
             return array('error'=>'error while changing zone temperature');
         }
@@ -300,7 +309,7 @@ class qivivoAPI {
         }
     }
 
-    public function cancelZoneOrder($zoneName='') //@return['result'] true, @return['error'] if any
+    public function cancelZoneOrder($zoneName='') //@return['result'] ['set_point']['instruction'], @return['error'] if any
     {
         $zoneId = null;
         $zones = $this->_houseData['heating']['zones'];
@@ -319,7 +328,12 @@ class qivivoAPI {
         $answer = $this->_request('DELETE', $url, null);
 
         if ($this->isJson($answer)) {
-            return array('result'=>true);
+            $jsonData = json_decode($answer, true);
+            if (isset($jsonData['set_point']['instruction'])) {
+                return array('result'=>$jsonData['set_point']['instruction']);
+            } else {
+                return array('error'=>'cannot get new order.');
+            }
         } else {
             return array('error'=>'error while setting departure');
         }
