@@ -159,16 +159,17 @@ class qivivoAPI {
         $products = $this->_houseData['devices'];
         $Devices = [];
         foreach ($products as $device) {
-            $serial = $device['serial_number'];
-            unset($device['serial_number']);
-            $Devices[$serial] = $device;
+            if (isset($device['serial_number'])) {
+                $serial = $device['serial_number'];
+                unset($device['serial_number']);
+                $Devices[$serial] = $device;
+            }
         }
 
         //get devices zones and order:
         if ( !isset($this->_houseData['zones']) ) {
             $this->getZones();
         }
-
 
         $zones = $this->_houseData['zones'];
         foreach ($zones as $zone) {
