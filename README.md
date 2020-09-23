@@ -162,6 +162,9 @@ $_qivivo->cancelDeparture();
 <img align="right" src="/readmeAssets/changes.png" width="48">
 ## Version history
 
+#### v2.1 (2020-09-23)
+- Support monozone configurations
+
 #### v2.02 (2020-09-11)
 - getZoneEvents()
 - hasTimeOrder()
