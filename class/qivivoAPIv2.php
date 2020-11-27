@@ -637,7 +637,7 @@ class qivivoAPI {
         }
     }
 
-    function __construct($qivivo_user, $qivivo_pass)
+    public function __construct($qivivo_user, $qivivo_pass)
     {
         $this->_qivivo_user = urlencode($qivivo_user);
         $this->_qivivo_pass = urlencode($qivivo_pass);
