@@ -9,11 +9,11 @@ This php API allows you to control your Smart Qivivo / Comap Thermostat.
 Jeedom user ? Check this  [Jeedom Plugin !](https://kiboost.github.io/jeedom_docs/plugins/qivivo/fr_FR/)
 
 ### Use case example
-- Get your Qivivo data to trigger other actions.<br />
+- Get your Qivivo/Comap data to trigger other actions.<br />
 - Set a scenario in your smarthome (or trigger an url script) like "Going hollidays", to automatically change programs according to your scenario (*working, hollidays, away*).<br />
 - Set your heating according to other weather sources (external Netatmo sensor, etc).<br />
 - Set your heating if your interior camera recognize you.<br />
-- As Qivivo doesn't support IFTTT yet, you can make your own trigger script!
+- As Qivivo/Comap doesn't support IFTTT yet, you can make your own trigger script!
 
 
 *This isn't an official API | USE AT YOUR OWN RISK!<br />
@@ -31,13 +31,13 @@ This API is reverse-engineered, provided for research and development for intero
 ## Requirements
 - PHP v5+
 - cURL (quite standard in PHP servers).
-- The API require internet access (it will authenticate against Qivivo servers).
+- The API require internet access (it will authenticate against Qivivo/Comap servers).
 
 [&#8657;](#php-qivivoapi)
 <img align="right" src="/readmeAssets/howto.png" width="48">
 ## How-to
-- Download class/qivivoAPIv2.php and put it on your server.
-- Include qivivoAPI.php in your script.
+- Download class/comapAPI.php and put it on your server.
+- Include comapAPI.php in your script.
 - Start it with your Qivivo username/password.
 All function should return an array with 'result' or 'error'. So you can check for 'error' before getting 'result': if (!isset($answer['error']) ...
 
@@ -46,7 +46,7 @@ All function should return an array with 'result' or 'error'. So you can check f
 #### Connection
 
 ```php
-require($_SERVER['DOCUMENT_ROOT'].'/path/to/qivivoAPIv2.php');
+require($_SERVER['DOCUMENT_ROOT'].'/path/to/comapAPI.php');
 $_qivivo = new qivivoAPI($qivivo_user, $qivivo_pass);
 if (isset($_qivivo->error)) echo $_qivivo->error;
 ```
@@ -161,6 +161,10 @@ $_qivivo->cancelDeparture();
 [&#8657;](#php-qivivoapi)
 <img align="right" src="/readmeAssets/changes.png" width="48">
 ## Version history
+
+#### v2.5 (2021-10-06)
+- Aligned with Jeedom plugin
+- API renamed comapAPI.php
 
 #### v2.1 (2020-09-23)
 - Support monozone configurations
