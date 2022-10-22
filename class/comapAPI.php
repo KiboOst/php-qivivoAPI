@@ -33,7 +33,7 @@ https://github.com/KiboOst/php-qivivoAPI
 
 class qivivoAPI {
 
-    public $version = '2.5';
+    public $version = '3.0';
 
     //USER FUNCTIONS======================================================
     //GET FUNCTIONS:
@@ -41,9 +41,9 @@ class qivivoAPI {
         $this->getDatas();
     }
 
-    //@return['result'] array with heating datas
-    public function getHeating() {
-        if ($this->_houseData == null)
+    //@return['result'] array with house name
+    public function getHouseIdbyName($name) {
+        if ($this->_houses == null)
         {
             $datas = $this->getDatas();
         }
@@ -51,70 +51,88 @@ class qivivoAPI {
         {
             return $datas;
         }
-        return array('result'=>$this->_houseData['heating']);
+        for ($i=0; $i<count($this->_houses); ++$i) {
+            if ($this->_houses[$i]['name'] == $name) {
+                return array('result'=>$i);
+            }
+        }
+        return array('error'=>'No house found with this name');
+    }
+
+    //@return['result'] array with heating datas
+    public function getHeating($houseId=0) {
+        if ($this->_houses == null)
+        {
+            $datas = $this->getDatas();
+        }
+        if (isset($datas['error']))
+        {
+            return $datas;
+        }
+        return array('result'=>$this->_houses[$houseId]['heating']);
     }
 
     //@return['result'] array with temperatures and settings
-    public function getTempSettings() {
-        if (isset($this->_houseData['temperatures']))
+    public function getTempSettings($houseId=0) {
+        if (isset($this->_houses[$houseId]['temperatures']))
         {
-            return array('result'=>$this->_houseData['temperatures']);
+            return array('result'=>$this->_houses[$houseId]['temperatures']);
         }
 
-        $url = $this->_urlRoot.'/thermal/housings/'.$this->_houseData['id'].'/thermal-settings';
+        $url = $this->_urlRoot.'/thermal/housings/'.$this->_houses[$houseId]['id'].'/thermal-settings';
         $answer = $this->_request('GET', $url);
         $jsonData = json_decode($answer, true);
 
-        $this->_houseData['temperatures'] = $jsonData;
+        $this->_houses[$houseId]['temperatures'] = $jsonData;
 
         if ($jsonData['global_informations']['installation_type'] == 'multizone')
         {
-            $this->_houseData['isMultizone'] = true;
+            $this->_houses[$houseId]['isMultizone'] = true;
         }
         else
         {
-            $this->_houseData['isMultizone'] = false;
+            $this->_houses[$houseId]['isMultizone'] = false;
         }
 
         return array('result'=>$jsonData);
     }
 
     //@return['result'] array with multizone setting
-    public function isMultizone() {
-        if (isset($this->_houseData['isMultizone']))
+    public function isMultizone($houseId=0) {
+        if (isset($this->_houses[$houseId]['isMultizone']))
         {
-            return array('result'=>$this->_houseData['isMultizone']);
+            return array('result'=>$this->_houses[$houseId]['isMultizone']);
         }
 
-        $this->getTempSettings();
-        return array('result'=>$this->_houseData['isMultizone']);
+        $this->getTempSettings($houseId);
+        return array('result'=>$this->_houses[$houseId]['isMultizone']);
     }
 
     //@return['result'] array with readable formated program
-    public function getPrograms() {
-        if (isset($this->_houseData['programs']))
+    public function getPrograms($houseId=0) {
+        if (isset($this->_houses[$houseId]['programs']))
         {
-            return array('result'=>$this->_houseData['programs']);
+            return array('result'=>$this->_houses[$houseId]['programs']);
         }
 
-        $url = $this->_urlRoot.'/thermal/housings/'.$this->_houseData['id'].'/programs';
+        $url = $this->_urlRoot.'/thermal/housings/'.$this->_houses[$houseId]['id'].'/programs';
         $answer = $this->_request('GET', $url);
         $jsonData = json_decode($answer, true);
 
-        $this->_houseData['programs'] = $jsonData['programs'];
+        $this->_houses[$houseId]['programs'] = $jsonData['programs'];
 
         return array('result'=>$jsonData['programs']);
     }
 
     //@return['result'] array with current program selection
-    public function getCurrentProgram() {
-        if (isset($this->_houseData['programs']))
+    public function getCurrentProgram($houseId=0) {
+        if (isset($this->_houses[$houseId]['programs']))
         {
-            $programs = $this->_houseData['programs'];
+            $programs = $this->_houses[$houseId]['programs'];
         }
         else
         {
-            $programs = $this->getPrograms()['result'];
+            $programs = $this->getPrograms($houseId)['result'];
         }
 
         foreach ($programs as $program) {
@@ -127,36 +145,36 @@ class qivivoAPI {
     }
 
     //@return['result'] array with readable formated program
-    public function getSchedules() {
-        if (isset($this->_houseData['schedules']))
+    public function getSchedules($houseId=0) {
+        if (isset($this->_houses[$houseId]['schedules']))
         {
-            return array('result'=>$this->_houseData['schedules']);
+            return array('result'=>$this->_houses[$houseId]['schedules']);
         }
 
-        $url = $this->_urlRoot.'/thermal/housings/'.$this->_houseData['id'].'/schedules';
+        $url = $this->_urlRoot.'/thermal/housings/'.$this->_houses[$houseId]['id'].'/schedules';
         $answer = $this->_request('GET', $url);
         $jsonData = json_decode($answer, true);
 
-        $this->_houseData['schedules'] = $jsonData;
+        $this->_houses[$houseId]['schedules'] = $jsonData;
 
         return array('result'=>$jsonData);
     }
 
     //@return['result'] array with current program selection
-    public function getCurrentSchedule() {
-        $currentProgram = $this->getCurrentProgram()['result'];
+    public function getCurrentSchedule($houseId=0) {
+        $currentProgram = $this->getCurrentProgram($houseId)['result'];
         if (isset($currentProgram['error']))
         {
             return $currentProgram;
         }
 
-        if (isset($this->_houseData['schedules']))
+        if (isset($this->_houses[$houseId]['schedules']))
         {
-            $schedules = $this->_houseData['schedules'];
+            $schedules = $this->_houses[$houseId]['schedules'];
         }
         else
         {
-            $schedules = $this->getschedules()['result'];
+            $schedules = $this->getschedules($houseId)['result'];
         }
 
         foreach ($schedules as $schedule) {
@@ -169,33 +187,33 @@ class qivivoAPI {
     }
 
     //@return['result'] array with devices
-    public function getDevices() {
-        $url = $this->_urlRoot.'/park/housings/'.$this->_houseData['id'].'/connected-objects';
+    public function getDevices($houseId=0) {
+        $url = $this->_urlRoot.'/park/housings/'.$this->_houses[$houseId]['id'].'/connected-objects';
         $answer = $this->_request('GET', $url);
         $jsonData = json_decode($answer, true);
-        $this->_houseData['devices'] = $jsonData;
+        $this->_houses[$houseId]['devices'] = $jsonData;
         return array('result'=>$jsonData);
     }
 
     //@return['result'] array with zones
-    public function getZones() {
-        if (isset($this->_houseData['zones']))
+    public function getZones($houseId=0) {
+        if (isset($this->_houses[$houseId]['zones']))
         {
-            return array('result'=>$this->_houseData['zones']);
+            return array('result'=>$this->_houses[$houseId]['zones']);
         }
 
-        $url = $this->_urlRoot.'/thermal/housings/'.$this->_houseData['id'].'/zones';
+        $url = $this->_urlRoot.'/thermal/housings/'.$this->_houses[$houseId]['id'].'/zones';
         $answer = $this->_request('GET', $url);
         $jsonData = json_decode($answer, true);
 
-        $this->_houseData['zones'] = $jsonData;
+        $this->_houses[$houseId]['zones'] = $jsonData;
 
         return array('result'=>$jsonData);
     }
 
     //@zoneName | @return['result'] array with zone events
-    public function getZoneEvents($zoneName='') {
-        $zones = $this->_houseData['heating']['zones'];
+    public function getZoneEvents($zoneName='', $houseId=0) {
+        $zones = $this->_houses[$houseId]['heating']['zones'];
         foreach ($zones as $zone) {
             if ($zone['title'] == $zoneName)
             {
@@ -206,8 +224,8 @@ class qivivoAPI {
     }
 
     //@zoneName | @return['result'] true, @return['error'] if any
-    public function hasTimeOrder($zoneName='') {
-        $zoneEvents = $this->getZoneEvents($zoneName);
+    public function hasTimeOrder($zoneName='', $houseId=0) {
+        $zoneEvents = $this->getZoneEvents($zoneName, $houseId);
         if (isset($zoneEvents['error']))
         {
             return $zoneEvents;
@@ -220,21 +238,21 @@ class qivivoAPI {
     }
 
     //@return['result'] array with weather datas
-    public function getWeather() {
-        $url = $this->_urlRoot.'/weather/weather/current?housing_id='.$this->_houseData['id'];
+    public function getWeather($houseId=0) {
+        $url = $this->_urlRoot.'/weather/weather/current?housing_id='.$this->_houses[$houseId]['id'];
         $answer = $this->_request('GET', $url);
         $jsonData = json_decode($answer, true);
         return array('result'=>$jsonData);
     }
 
     //@return['result'] array of devices with zone, order, by serial number
-    public function getFullDevices() {
-        if (!isset($this->_houseData['devices']))
+    public function getFullDevices($houseId=0) {
+        if (!isset($this->_houses[$houseId]['devices']))
         {
-            $this->getDevices();
+            $this->getDevices($houseId);
         }
 
-        $products = $this->_houseData['devices'];
+        $products = $this->_houses[$houseId]['devices'];
         $Devices = [];
         foreach ($products as $device) {
             if (isset($device['serial_number']))
@@ -246,16 +264,16 @@ class qivivoAPI {
         }
 
         //get devices zones and order:
-        if ( !isset($this->_houseData['zones']))
+        if (!isset($this->_houses[$houseId]['zones']))
         {
-            $this->getZones();
+            $this->getZones($houseId);
         }
 
-        $zones = $this->_houseData['zones'];
+        $zones = $this->_houses[$houseId]['zones'];
         foreach ($zones as $zone) {
             $zoneName = $zone['title'];
             //get zone order:
-            foreach ($this->_houseData['heating']['zones'] as $heatingZone) {
+            foreach ($this->_houses[$houseId]['heating']['zones'] as $heatingZone) {
                 if ($heatingZone['id'] == $zone['id'])
                 {
                     if ($zone['instruction_type'] == 'temperature')
@@ -288,7 +306,7 @@ class qivivoAPI {
     //SET FUNCTIONS:
 
     //@state false/true | @return['result'] true, @return['error'] if any
-    public function setHeating($state=true) {
+    public function setHeating($state=true, $houseId=0) {
         $state = var_export($state, true);
         $availValues = ['false', 'true'];
         if (!in_array($state, $availValues))
@@ -305,7 +323,7 @@ class qivivoAPI {
             $post = '{"state":"off"}';
         }
 
-        $url = $this->_urlRoot.'/thermal/housings/'.$this->_houseData['id'].'/thermal-control/heating-system-state';
+        $url = $this->_urlRoot.'/thermal/housings/'.$this->_houses[$houseId].'/thermal-control/heating-system-state';
         $answer = $this->_request('PUT', $url, $post);
 
         if ($this->isJson($answer))
@@ -319,14 +337,14 @@ class qivivoAPI {
     }
 
     //@return['result'] true, @return['error'] if any
-    public function setTemperature($value, $period=120, $zoneName=null) {
+    public function setTemperature($value, $period=120, $zoneName=null, $houseId=0) {
         //get thermostat zone id:
-        if ($this->_houseData == null) {
+        if ($this->_houses == null) {
             $datas = $this->getDatas();
         }
 
         $zoneId = null;
-        $zones = $this->_houseData['heating']['zones'];
+        $zones = $this->_houses[$houseId]['heating']['zones'];
         foreach ($zones as $zone) {
             if ($zoneName)
             {
@@ -353,14 +371,14 @@ class qivivoAPI {
             return array('error'=>'Could not find zone.');
         }
 
-        $hasTimeOrder = $this->hasTimeOrder($zoneName);
+        $hasTimeOrder = $this->hasTimeOrder($zoneName, $houseId);
         if ($hasTimeOrder['result'])
         {
-            $this->cancelZoneOrder($zoneName);
+            $this->cancelZoneOrder($zoneName, $houseId);
         }
 
         $post = '{"duration":'.$period.',"set_point":{"instruction":'.$value.'}}';
-        $url = $this->_urlRoot.'/thermal/housings/'.$this->_houseData['id'].'/thermal-control/zones/'.$zoneId.'/temporary-instruction';
+        $url = $this->_urlRoot.'/thermal/housings/'.$this->_houses[$houseId]['id'].'/thermal-control/zones/'.$zoneId.'/temporary-instruction';
         $answer = $this->_request('POST', $url, $post);
 
         if ($this->isJson($answer))
@@ -386,7 +404,7 @@ class qivivoAPI {
     }
 
     //@return['result'] true, @return['error'] if any
-    public function setZoneMode($mode, $period=120, $zoneName=null) {
+    public function setZoneMode($mode, $period=120, $zoneName=null, $houseId=0) {
         if (!$mode || !$zoneName)
         {
             return array('error'=>'You must specify mode name, period in minutes, zone name.');
@@ -398,7 +416,7 @@ class qivivoAPI {
         }
 
         $zoneId = null;
-        $zones = $this->_houseData['heating']['zones'];
+        $zones = $this->_houses[$houseId]['heating']['zones'];
         foreach ($zones as $zone) {
             if ($zone['title'] == $zoneName)
             {
@@ -415,14 +433,14 @@ class qivivoAPI {
             return array('error'=>'Could not find zone.');
         }
 
-        $hasTimeOrder = $this->hasTimeOrder($zoneName);
+        $hasTimeOrder = $this->hasTimeOrder($zoneName, $houseId);
         if ($hasTimeOrder['result'])
         {
-            $this->cancelZoneOrder($zoneName);
+            $this->cancelZoneOrder($zoneName, $houseId);
         }
 
         $post = '{"duration":'.$period.',"set_point":{"instruction":"'.$mode.'"}}';
-        $url = $this->_urlRoot.'/thermal/housings/'.$this->_houseData['id'].'/thermal-control/zones/'.$zoneId.'/temporary-instruction';
+        $url = $this->_urlRoot.'/thermal/housings/'.$this->_houses[$houseId]['id'].'/thermal-control/zones/'.$zoneId.'/temporary-instruction';
         $answer = $this->_request('POST', $url, $post);
 
         if ($this->isJson($answer))
@@ -436,9 +454,9 @@ class qivivoAPI {
     }
 
     //@return['result'] ['set_point']['instruction'], @return['error'] if any
-    public function cancelZoneOrder($zoneName=null) {
+    public function cancelZoneOrder($zoneName=null, $houseId=0) {
         $zoneId = null;
-        $zones = $this->_houseData['heating']['zones'];
+        $zones = $this->_houses[$houseId]['heating']['zones'];
 
         if (!$zoneName)
         {
@@ -459,7 +477,7 @@ class qivivoAPI {
             }
         }
 
-        $url = $this->_urlRoot.'/thermal/housings/'.$this->_houseData['id'].'/thermal-control/zones/'.$zoneId.'/temporary-instruction';
+        $url = $this->_urlRoot.'/thermal/housings/'.$this->_houses[$houseId]['id'].'/thermal-control/zones/'.$zoneId.'/temporary-instruction';
         $answer = $this->_request('DELETE', $url, null);
 
         if ($this->isJson($answer))
@@ -481,26 +499,26 @@ class qivivoAPI {
     }
 
     //@name string, @datas array | @return['result'] true, @return['error'] if any
-    public function setProgram($name='') {
+    public function setProgram($name='', $houseId=0) {
         if ($this->isMultizone()['result'] === false)
         {
-            return $this->setSchedule($name);
+            return $this->setSchedule($name, $houseId);
         }
 
-        if (isset($this->_houseData['programs']))
+        if (isset($this->_houses[$houseId]['programs']))
         {
-            $programs = $this->_houseData['programs'];
+            $programs = $this->_houses[$houseId]['programs'];
         }
         else
         {
-            $programs = $this->getPrograms()['result'];
+            $programs = $this->getPrograms($houseId)['result'];
         }
 
         foreach ($programs as $program) {
             if ($program['title'] == $name)
             {
                 $id = $program['id'];
-                $url = $this->_urlRoot.'/thermal/housings/'.$this->_houseData['id'].'/programs/'.$id.'/activate';
+                $url = $this->_urlRoot.'/thermal/housings/'.$this->_houses[$houseId]['id'].'/programs/'.$id.'/activate';
                 $answer = $this->_request('POST', $url, null);
                 if ($this->isJson($answer))
                 {
@@ -516,20 +534,20 @@ class qivivoAPI {
 
     //No program in Monozone, setProgram() use setSchedule()
     //@name string, @datas array | @return['result'] true, @return['error'] if any
-    public function setSchedule($name='') {
-        if (isset($this->_houseData['schedules']))
+    public function setSchedule($name='', $houseId=0) {
+        if (isset($this->_houses[$houseId]['schedules']))
         {
-            $schedules = $this->_houseData['schedules'];
+            $schedules = $this->_houses[$houseId]['schedules'];
         }
         else
         {
-            $schedules = $this->getSchedules()['result'];
+            $schedules = $this->getSchedules($houseId)['result'];
         }
 
-        $program = $this->getCurrentProgram()['result'];
+        $program = $this->getCurrentProgram($houseId)['result'];
         $programId = $program['id'];
 
-        $zone = $this->_houseData['heating']['zones'][0];
+        $zone = $this->_houses[$houseId]['heating']['zones'][0];
         $zoneId = $zone['id'];
 
         foreach ($schedules as $schedule) {
@@ -545,7 +563,7 @@ class qivivoAPI {
                 echo 'setSchedule -> '.$id;
 
 
-                $url = $this->_urlRoot.'/thermal/housings/'.$this->_houseData['id'].'/programs/'.$programId.'/zones/'.$zoneId;
+                $url = $this->_urlRoot.'/thermal/housings/'.$this->_houses[$houseId]['id'].'/programs/'.$programId.'/zones/'.$zoneId;
                 $post = json_encode($data);
                 $answer = $this->_request('POST', $url, $post);
                 if ($this->isJson($answer))
@@ -561,14 +579,14 @@ class qivivoAPI {
     }
 
     //$settingsAr array | @return['result'] true, @return['error'] if any
-    public function setTempSettings($settingsAr) {
+    public function setTempSettings($settingsAr, $houseId=0) {
         if (!is_array($settingsAr))
         {
             return array('error'=>'You must send settings array of value by 0.5.');
         }
 
         $post = json_encode($settingsAr);
-        $url = $this->_urlRoot.'/thermal/housings/'.$this->_houseData['id'].'/custom-temperatures';
+        $url = $this->_urlRoot.'/thermal/housings/'.$this->_houses[$houseId]['id'].'/custom-temperatures';
         $answer = $this->_request('PUT', $url, $post);
 
         if ($this->isJson($answer))
@@ -582,8 +600,8 @@ class qivivoAPI {
     }
 
     //@return['result'] true, @return['error'] if any
-    public function setAway() {
-        $url = $this->_urlRoot.'/thermal/housings/'.$this->_houseData['id'].'/thermal-control/leave-home';
+    public function setAway($houseId=0) {
+        $url = $this->_urlRoot.'/thermal/housings/'.$this->_houses[$houseId]['id'].'/thermal-control/leave-home';
         $answer = $this->_request('POST', $url, null);
 
         if ($this->isJson($answer))
@@ -597,8 +615,8 @@ class qivivoAPI {
     }
 
     //@return['result'] true, @return['error'] if any
-    public function cancelAway() {
-        $url = $this->_urlRoot.'/thermal/housings/'.$this->_houseData['id'].'/thermal-control/leave-home';
+    public function cancelAway($houseId=0) {
+        $url = $this->_urlRoot.'/thermal/housings/'.$this->_houses[$houseId]['id'].'/thermal-control/leave-home';
         $answer = $this->_request('DELETE', $url, null);
 
         if ($this->isJson($answer))
@@ -612,7 +630,7 @@ class qivivoAPI {
     }
 
     //@$startDate, $endDate string like "2020-09-03T22:00:12.000Z" | @return['result'] true, @return['error'] if any
-    public function setDeparture($startDate=null, $endDate=null) {
+    public function setDeparture($startDate=null, $endDate=null, $houseId=0) {
         if (is_null($startDate) && is_null($endDate))
         {
             $post = '{}';
@@ -622,7 +640,7 @@ class qivivoAPI {
             $post = '{"begin_at":"'.$startDate.'","end_at":"'.$endDate.'"}';
         }
 
-        $url = $this->_urlRoot.'/thermal/housings/'.$this->_houseData['id'].'/thermal-control/absence';
+        $url = $this->_urlRoot.'/thermal/housings/'.$this->_houses[$houseId]['id'].'/thermal-control/absence';
         $answer = $this->_request('POST', $url, $post);
 
         if ($this->isJson($answer))
@@ -636,8 +654,8 @@ class qivivoAPI {
     }
 
     //@return['result'] true, @return['error'] if any
-    public function cancelDeparture() {
-        $url = $this->_urlRoot.'/thermal/housings/'.$this->_houseData['id'].'/thermal-control/absence';
+    public function cancelDeparture($houseId=0) {
+        $url = $this->_urlRoot.'/thermal/housings/'.$this->_houses[$houseId]['id'].'/thermal-control/absence';
         $answer = $this->_request('DELETE', $url, null);
 
         if ($this->isJson($answer))
@@ -661,21 +679,19 @@ class qivivoAPI {
     protected function getDatas() {
         $url = $this->_urlRoot.'/park/housings';
         $answer = $this->_request('GET', $url);
-        $answer = substr($answer, 1, -1);
-
         $jsonData = json_decode($answer, true);
-
-        if (!isset($jsonData['id']))
+        if (!isset($jsonData[0]['id']))
         {
             $this->error = 'Could not get any data!';
             return array('result'=>null, 'error' => $this->error);
         }
 
-        $this->_houseData = $jsonData;
-
-        $url = $this->_urlRoot.'/thermal/housings/'.$jsonData['id'].'/thermal-details';
-        $answer = $this->_request('GET', $url);
-        $this->_houseData['heating'] = json_decode($answer, true);
+        for ($i=0; $i<count($jsonData); ++$i) {
+            $this->_houses[$i] = $jsonData[$i];
+            $url = $this->_urlRoot.'/thermal/housings/'.$this->_houses[$i]['id'].'/thermal-details';
+            $answer = $this->_request('GET', $url);
+            $this->_houses[$i]['heating'] = json_decode($answer, true);
+        }
     }
 
     protected function _request($method, $url, $post=null) {
@@ -742,7 +758,7 @@ class qivivoAPI {
     public $error = null;
     public $_token = null;
 
-    public $_houseData = null;
+    public $_houses = null;
 
     protected $_comapUser;
     protected $_comapUserPass;

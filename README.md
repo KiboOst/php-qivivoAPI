@@ -158,9 +158,27 @@ $_qivivo->cancelDeparture();
 
 ```
 
+
+[&#8657;](#php-qivivoapi)
+#### MULTI HOUSE SUPPORT<br />
+
+If you account has several homes, you can get an houseId and pass it to every function as kast argument. For example:
+
+
+```php
+$homeId = $_qivivo->getHouseIdbyName('Beach Home');
+$_qivivo->setHeating(true, $homeId);
+$_qivivo->cancelAway($homeId);
+
+```
+
+
 [&#8657;](#php-qivivoapi)
 <img align="right" src="/readmeAssets/changes.png" width="48">
 ## Version history
+
+#### v3.0 (2022-10-22)
+- Support multi house account.
 
 #### v2.5 (2021-10-06)
 - Aligned with Jeedom plugin
