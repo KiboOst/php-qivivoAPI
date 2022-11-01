@@ -835,7 +835,7 @@ class qivivoAPI {
 
     public function __construct($comapUser, $comapUserPass) {
         $this->_comapUser = $comapUser;
-        $this->_comapUserPass = urlencode($comapUserPass);
+        $this->_comapUserPass = $comapUserPass;
 
         if ($this->connect() == true)
         {
