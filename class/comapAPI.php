@@ -33,7 +33,7 @@ https://github.com/KiboOst/php-qivivoAPI
 
 class qivivoAPI {
 
-    public $version = '3.0';
+    public $version = '3.1';
 
     //USER FUNCTIONS======================================================
     //GET FUNCTIONS:
@@ -79,7 +79,7 @@ class qivivoAPI {
             return array('result'=>$this->_houses[$houseId]['temperatures']);
         }
 
-        $url = $this->_urlRoot.'/thermal/housings/'.$this->_houses[$houseId]['id'].'/thermal-settings';
+        $url = $this->_urlRoot.'/thermal/housings/'.$this->_houses[$houseId]['id'].'/custom-temperatures';
         $answer = $this->_request('GET', $url);
         $jsonData = json_decode($answer, true);
 
@@ -500,10 +500,12 @@ class qivivoAPI {
 
     //@name string, @datas array | @return['result'] true, @return['error'] if any
     public function setProgram($name='', $houseId=0) {
+        /*
         if ($this->isMultizone()['result'] === false)
         {
             return $this->setSchedule($name, $houseId);
         }
+        */
 
         if (isset($this->_houses[$houseId]['programs']))
         {
@@ -560,9 +562,6 @@ class qivivoAPI {
                     "schedule_id"=>$id
                 );
 
-                echo 'setSchedule -> '.$id;
-
-
                 $url = $this->_urlRoot.'/thermal/housings/'.$this->_houses[$houseId]['id'].'/programs/'.$programId.'/zones/'.$zoneId;
                 $post = json_encode($data);
                 $answer = $this->_request('POST', $url, $post);
@@ -587,7 +586,7 @@ class qivivoAPI {
 
         $post = json_encode($settingsAr);
         $url = $this->_urlRoot.'/thermal/housings/'.$this->_houses[$houseId]['id'].'/custom-temperatures';
-        $answer = $this->_request('PUT', $url, $post);
+        $answer = $this->_request('PATCH', $url, $post);
 
         if ($this->isJson($answer))
         {
@@ -814,15 +813,15 @@ class qivivoAPI {
                 return false;
             }
 
-            //get idToken:
-            if (isset($json['AuthenticationResult']['IdToken']))
+            //get AccessToken:
+            if (isset($json['AuthenticationResult']['AccessToken']))
             {
-                $this->_token = $json['AuthenticationResult']['IdToken'];
+                $this->_token = $json['AuthenticationResult']['AccessToken'];
                 return true;
             }
             else
             {
-                $this->error = 'Cannot find IdToken.';
+                $this->error = 'Cannot find AccessToken.';
                 return false;
             }
         }
@@ -835,7 +834,7 @@ class qivivoAPI {
 
     public function __construct($comapUser, $comapUserPass) {
         $this->_comapUser = $comapUser;
-        $this->_comapUserPass = $comapUserPass;
+        $this->_comapUserPass = urlencode($comapUserPass);
 
         if ($this->connect() == true)
         {
