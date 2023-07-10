@@ -79,7 +79,7 @@ class qivivoAPI {
             return array('result'=>$this->_houses[$houseId]['temperatures']);
         }
 
-        $url = $this->_urlRoot.'/thermal/housings/'.$this->_houses[$houseId]['id'].'/custom-temperatures';
+        $url = $this->_urlRoot.'/thermal/housings/'.$this->_houses[$houseId]['id'].'/thermal-settings';
         $answer = $this->_request('GET', $url);
         $jsonData = json_decode($answer, true);
 
