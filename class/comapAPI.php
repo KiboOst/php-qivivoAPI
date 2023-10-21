@@ -33,7 +33,7 @@ https://github.com/KiboOst/php-qivivoAPI
 
 class qivivoAPI {
 
-    public $version = '3.1';
+    public $version = '3.2';
 
     //USER FUNCTIONS======================================================
     //GET FUNCTIONS:
@@ -94,7 +94,12 @@ class qivivoAPI {
             $this->_houses[$houseId]['isMultizone'] = false;
         }
 
-        return array('result'=>$jsonData);
+        $url = $this->_urlRoot.'/thermal/housings/'.$this->_houses[$houseId]['id'].'/custom-temperatures';
+        $answer = $this->_request('GET', $url);
+        $jsonData = json_decode($answer, true);
+        $this->_houses[$houseId]['temperatures']['settings'] = $jsonData;
+
+        return array('result'=>$this->_houses[$houseId]['temperatures']);
     }
 
     //@return['result'] array with multizone setting
@@ -279,6 +284,16 @@ class qivivoAPI {
                     if ($zone['instruction_type'] == 'temperature')
                     {
                         $order = $heatingZone['set_point']['instruction'];
+                        $orderDesc = $heatingZone['set_point']['instruction'];
+                        if (in_array($orderDesc, ['night', 'away', 'frost_protection', 'stop']))
+                        {
+                            $order = $this->_houses[$houseId]['temperatures']['settings'][$heatingZone['set_point']['instruction']];
+                        }
+                        if (in_array($orderDesc, ['presence_1', 'presence_2', 'presence_3', 'presence_4']))
+                        {
+                            $order = $this->_houses[$houseId]['temperatures']['settings']['connected'][$heatingZone['set_point']['instruction']];
+                        }
+
                         $status = $heatingZone['heating_status'];
                     }
                     else
@@ -690,6 +705,7 @@ class qivivoAPI {
             $url = $this->_urlRoot.'/thermal/housings/'.$this->_houses[$i]['id'].'/thermal-details';
             $answer = $this->_request('GET', $url);
             $this->_houses[$i]['heating'] = json_decode($answer, true);
+            $this->getTempSettings($i);
         }
     }
 
@@ -841,5 +857,5 @@ class qivivoAPI {
             $this->getDatas();
         }
     }
-} //qivivoAPIv2 end
+} //qivivoAPIv3 end
 ?>
