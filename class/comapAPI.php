@@ -33,7 +33,7 @@ https://github.com/KiboOst/php-qivivoAPI
 
 class qivivoAPI {
 
-    public $version = '3.22';
+    public $version = '3.5';
 
     //USER FUNCTIONS======================================================
     //GET FUNCTIONS:
@@ -167,11 +167,11 @@ class qivivoAPI {
 
     //@return['result'] array with current program selection
     public function getCurrentSchedule($houseId=0) {
-        $currentProgram = $this->getCurrentProgram($houseId)['result'];
-        if (isset($currentProgram['error']))
-        {
-            return $currentProgram;
+        $response = $this->getCurrentProgram($houseId);
+        if (isset($response['error'])) {
+            return $response;
         }
+        $currentProgram = $response['result'];
 
         if (isset($this->_houses[$houseId]['schedules']))
         {
@@ -322,23 +322,9 @@ class qivivoAPI {
 
     //@state false/true | @return['result'] true, @return['error'] if any
     public function setHeating($state=true, $houseId=0) {
-        $state = var_export($state, true);
-        $availValues = ['false', 'true'];
-        if (!in_array($state, $availValues))
-        {
-            return array('result'=>null, 'error'=>'Got wrong value, should be in '.implode(', ', $availValues));
-        }
-
-        if ($state == true)
-        {
-            $post = '{"state":"on"}';
-        }
-        else
-        {
-            $post = '{"state":"off"}';
-        }
-
-        $url = $this->_urlRoot.'/thermal/housings/'.$this->_houses[$houseId].'/thermal-control/heating-system-state';
+        if (!is_bool($state)) return array('result'=>null, 'error'=>'Got wrong value, should be in (true, false)');
+        $post = ($state === true) ? '{"state":"on"}' : '{"state":"off"}';
+        $url = $this->_urlRoot.'/thermal/housings/'.$this->_houses[$houseId]['id'].'/thermal-control/heating-system-state';
         $answer = $this->_request('PUT', $url, $post);
 
         if ($this->isJson($answer))
@@ -746,6 +732,10 @@ class qivivoAPI {
         {
             curl_setopt($this->_curlHdl, CURLOPT_CUSTOMREQUEST, 'GET');
             curl_setopt($this->_curlHdl, CURLOPT_HTTPGET, true);
+        }
+        if ($method == 'PATCH') {
+            curl_setopt($this->_curlHdl, CURLOPT_CUSTOMREQUEST, 'PATCH');
+            curl_setopt($this->_curlHdl, CURLOPT_POSTFIELDS, $post ?? '');
         }
         if ($method == 'POST')
         {
